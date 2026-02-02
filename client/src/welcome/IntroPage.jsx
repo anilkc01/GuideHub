@@ -1,56 +1,86 @@
-import React, { useState, useEffect } from 'react';
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
-const IntroPage = () => {
-  const [show, setShow] = useState(false);
+const LandingPage = ({ scrollContainerRef }) => {
+  const ref = useRef(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    container: scrollContainerRef,
+    offset: ["start start", "end start"],
+    layoutEffect: false, // Better performance
+  });
 
-  useEffect(() => {
-    setShow(true);
-  }, []);
+  // Smoother transforms
+  const backgroundY = useTransform(
+    scrollYProgress, 
+    [0, 1], 
+    ["0%", "100%"]
+  );
+  
+  const textY = useTransform(
+    scrollYProgress, 
+    [0, 1], 
+    ["0%", "300%"]
+  );
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black select-none">
-      
-      {/* Background Image - Frame 1 Style */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-10000"
-        style={{ backgroundImage: `url('/intro.jpg')` }}
+    <div
+      ref={ref}
+      className="w-full h-screen overflow-hidden relative grid place-items-center"
+    >
+      <motion.h1
+        style={{ 
+          y: textY,
+          willChange: "transform",
+        }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ 
+          duration: 1.5, 
+          ease: [0.25, 0.1, 0.25, 1],
+        }}
+        className="font-bold text-white relative z-10
+                   text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl
+                   -translate-x-2 -translate-y-8
+                   sm:-translate-x-3 sm:-translate-y-12
+                   md:-translate-x-4 md:-translate-y-10
+                   lg:-translate-x-8 lg:-translate-y-20
+                   xl:-translate-x-12 xl:-translate-y-35"
       >
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
+        GuideHub
+      </motion.h1>
 
-      {/* Main Content Container */}
-      <div className={`relative z-10 h-full w-full flex items-center justify-between px-20 lg:px-32 transition-all duration-1000 ease-out ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-        
-        {/* Left Content: Heading & Subtitle */}
-        <div className="flex flex-col gap-2 max-w-2xl">
-          <h1 className="text-[96px] font-bold text-white leading-none font-serif drop-shadow-2xl">
-            Explore Nepal
-          </h1>
-          <h2 className="text-[42px] text-white/90 font-light italic font-serif">
-            With Freedom and Trust
-          </h2>
-        </div>
+      {/* Background layer with GPU acceleration */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url("/src/assets/fullpic.jpg")',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          y: backgroundY,
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+          perspective: 1000,
+          transform: "translateZ(0)",
+        }}
+      />
 
-        {/* Right Content: The 50% Opacity Box */}
-        <div className="bg-black/50  p-14 rounded-[40px] border border-white/10 max-w-145 shadow-2xl mr-10 transition-all duration-1000 delay-300">
-          <p className="text-[22px] text-white/95 leading-relaxed font-light font-sans">
-            <strong className="text-2xl block mb-4 font-bold not-italic">Your journey, your rules.</strong>
-            Plan freely, choose the right guide, and experience the Himalayas beyond fixed packages and rigid schedules.
-          </p>
-        </div>
-      </div>
-
-      {/* Center Down Arrow */}
-      <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 transition-all duration-1000 delay-700 ${show ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="w-14 h-14 rounded-full border border-white/40 flex items-center justify-center bg-white/10 backdrop-blur-md animate-bounce">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
-          </svg>
-        </div>
-      </div>
-
+      {/* Foreground layer - optimized */}
+      <div
+        className="absolute inset-0 z-20 pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 1)), url("/src/assets/mountain.png")',
+          backgroundSize: "cover",
+          backgroundPosition: "bottom",
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+          transform: "translateZ(0)",
+        }}
+      />
     </div>
   );
 };
 
-export default IntroPage;
+export default LandingPage;

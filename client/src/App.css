@@ -1,11 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
 
-body { background: black; overflow: hidden; }
+body { 
+  background: black; 
+  overflow-x: hidden;
+}
 
-.heading-primary, .heading-secondary { font-family: 'Playfair Display', serif; }
-.body-text { font-family: 'Poppins', sans-serif; }
+.heading-primary, .heading-secondary { 
+  font-family: 'Playfair Display', serif; 
+}
+
+.body-text { 
+  font-family: 'Poppins', sans-serif; 
+}
 
 .nav-dot {
   width: 10px;
