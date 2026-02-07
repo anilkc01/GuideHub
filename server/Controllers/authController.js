@@ -2,13 +2,15 @@ import User from "../Models/User.js";
 import Guide from "../Models/Guide.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../Security/jwt-utils.js";
+import { sendEmail } from "../Services/Email.js";
+import OTP from "../Models/Otp.js";
 
 
 export const registerUser = async (req, res) => {
   try {
-    const { fullName, email, phone, password, dob } = req.body;
+    const { fullName, email, phone, password, dob, address } = req.body;
 
-    if (!fullName || !email || !phone || !password || !dob) {
+    if (!fullName || !email || !phone || !password || !dob || !address) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -26,6 +28,7 @@ export const registerUser = async (req, res) => {
       phone,
       password: hashedPassword,
       dob,
+      address,
       role: "trekker", 
     });
 
@@ -40,47 +43,25 @@ export const registerUser = async (req, res) => {
 
 export const registerGuide = async (req, res) => {
   try {
-    
-    const { licenseNo, licenseImg, citizenshipImg } = req.body;
-    const userId = req.user.id; 
+    const { userId, licenseNo } = req.body;
+    const files = req.files;
 
-    
-    if (!licenseNo || !licenseImg || !citizenshipImg) {
-      return res.status(400).json({ 
-        message: "Missing required documents." 
-      });
+    if (!files.licenseImage || !files.citizenshipImage) {
+      return res.status(400).json({ message: "Both images are required." });
     }
 
-    const existingGuide = await Guide.findOne({ where: { userId } });
-    if (existingGuide) {
-      return res.status(400).json({ message: "You have already applied for or hold a guide profile." });
-    }
-
-    const duplicateLicense = await Guide.findOne({ where: { licenseNo } });
-    if (duplicateLicense) {
-      return res.status(400).json({ message: "This license number is already registered in our system." });
-    }
-
-    const newGuide = await Guide.create({
+    console.log("Received files:", files.licenseImage.path, files.citizenshipImage[0].path);
+    await Guide.create({
       userId,
       licenseNo,
-      licenseImg,
-      citizenshipImg,
-      totalTreks: 0,
-      status: "pending"
+      licenseImg: files.licenseImage[0].path,
+      citizenshipImg: files.citizenshipImage[0].path,
+      status: "pending" 
     });
 
-    await User.update({ role: "guide" }, { where: { id: userId } });
-
-    res.status(201).json({
-      message: "Registration successful. Your guide application is under review.",
-    });
-
+    res.status(200).json({ message: "Guide documents uploaded successfully" });
   } catch (error) {
-    res.status(500).json({ 
-      message: "An error occurred during guide registration.", 
-      error: error.message 
-    });
+    res.status(500).json({ message: "File upload failed", error: error.message });
   }
 };
 
@@ -115,10 +96,9 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-
 export const verifyPassword = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required." });
@@ -176,5 +156,74 @@ export const deleteAccount = async (req, res) => {
     res.status(200).json({ message: "Account deleted" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getOtp = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+   
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await OTP.destroy({ where: { email } });
+    await OTP.create({
+      email,
+      otp: otpCode,
+      expiresAt,
+    });
+
+    await sendEmail(
+      email,
+      "Verification Code",
+      `
+      <div style="font-family: sans-serif; max-width: 400px; border: 1px solid #eee; padding: 20px;">
+        <h2 style="color: #333;">Verify Your Email</h2>
+        <p>Use the following code to complete your registration:</p>
+        <div style="background: #f4f4f4; padding: 15px; text-align: center; border-radius: 8px;">
+          <b style="font-size: 24px; color: #B59353; letter-spacing: 5px;">${otpCode}</b>
+        </div>
+        <p style="font-size: 12px; color: #888; margin-top: 20px;">
+          This code expires in 5 minutes. If you did not request this, please ignore this email.
+        </p>
+      </div>
+      `
+    );
+
+    return res.status(200).json({ message: "OTP sent successfully" });
+
+  } catch (error) {
+    console.error("OTP Error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const record = await OTP.findOne({ where: { email, otp } });
+
+    if (!record) {
+      return res.status(400).json({ message: "Invalid OTP code" });
+    }
+
+    if (new Date() > record.expiresAt) {
+      await record.destroy(); // Optional cleanup
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // Success - clean up the OTP record so it can't be reused
+    await record.destroy();
+
+    return res.status(200).json({ message: "OTP verified" });
+  } catch (error) {
+    return res.status(500).json({ message: "Verification failed" });
   }
 };

@@ -1,12 +1,17 @@
-import { Router } from "express";
-import { deleteAccount, registerGuide, registerUser, verifyEmail, verifyPassword, verifyToken } from "../Controllers/authController";
-import { protect } from "../Middlewares/auth";
+import  express  from "express";
+import { deleteAccount, getOtp, registerGuide, registerUser, verifyEmail, verifyOtp, verifyPassword, verifyToken } from "../Controllers/authController.js";
+import { protect } from "../Middlewares/auth.js";
+import { uploadGuideDocs } from "../Middlewares/multer.js";
 
-const router = express.Router();
+const Router = express.Router();
 
 Router.post("/register", registerUser);
-Router.post("/registerguide", protect, registerGuide);
+Router.post("/register-guide", uploadGuideDocs, registerGuide);
 Router.post("/verify-email", verifyEmail);
 Router.post("/verify-password", verifyPassword);
 Router.post("/verify-token", verifyToken);
 Router.post("/delete-account", protect, deleteAccount);
+Router.post("/get-otp", getOtp);
+Router.post("/verify-otp", verifyOtp);
+
+export default Router;

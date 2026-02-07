@@ -1,6 +1,7 @@
-import { useRef } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import StepperBox from "./StepperBox";
+import FormContainer from "../Authentication/FormsContainer";
 
 const guideSteps = [
   { title: "Register as Guide", desc: "Verify your license and create a professional guide profile." },
@@ -13,23 +14,42 @@ const guideSteps = [
 
 const GuideWelcome = () => {
   const ref = useRef(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
     <div
       ref={ref}
       className="w-full h-screen overflow-hidden relative grid place-items-center bg-black"
     >
-      {/* Mobile Layout */}
-      <div className="lg:hidden flex flex-col items-center justify-center px-4 w-full h-full relative z-30 gap-15">
-        <motion.div
-          className="w-full max-w-sm"
-          initial={{ opacity: 0, y: -40 }}
-          whileInView={{ opacity: 0.9, y: 0 }}
-          viewport={{ amount: 0.2, once: false }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
-        >
-          <StepperBox steps={guideSteps} />
-        </motion.div>
+      {/* --- MOBILE LAYOUT --- */}
+      <div className="lg:hidden flex flex-col items-center justify-center px-4 w-full h-full relative z-30 gap-10">
+        <div className="w-full max-w-sm min-h-100 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            {!isAuthOpen ? (
+              <motion.div
+                key="stepper-mob"
+                className="w-full"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <StepperBox steps={guideSteps} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="auth-mob"
+                className="w-full"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <FormContainer role="guide" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <motion.div
           className="w-full max-w-sm flex flex-col gap-2"
@@ -46,13 +66,17 @@ const GuideWelcome = () => {
               Lead adventures, earn premium rates.
             </p>
           </div>
-          <button className="w-full sm:w-fit mt-3 px-8 sm:px-10 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-full text-white text-lg sm:text-xl font-medium hover:bg-white hover:text-black transition-all duration-300">
-            Get Started
+          <button
+            onClick={() => setIsAuthOpen(!isAuthOpen)}
+            className="w-full sm:w-fit mt-3 px-8 sm:px-10 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-full text-white text-lg sm:text-xl font-medium hover:bg-white hover:text-black transition-all duration-300"
+          >
+            {isAuthOpen ? "I will join later" : "Get Started"}
           </button>
         </motion.div>
       </div>
 
-      {/* Desktop Layout */}
+      {/* --- DESKTOP LAYOUT --- */}
+      {/* Left Text Content */}
       <motion.div
         className="hidden lg:flex absolute left-12 xl:left-30 top-1/2 -translate-y-1/2 flex-col gap-4 z-30"
         initial={{ opacity: 0, x: -120 }}
@@ -68,22 +92,47 @@ const GuideWelcome = () => {
             Lead adventures, earn premium rates.
           </p>
         </div>
-        <button className="w-fit mt-6 xl:mt-8 px-10 xl:px-14 py-2.5 xl:py-3 bg-white/10 border border-white/20 rounded-full text-white text-xl xl:text-2xl font-medium hover:bg-white hover:text-black transition-all duration-300 shadow-xl">
-          Get Started
+        <button
+          onClick={() => setIsAuthOpen(!isAuthOpen)}
+          className="w-fit mt-6 xl:mt-8 px-10 xl:px-14 py-2.5 xl:py-3 bg-white/10 border border-white/20 rounded-full text-white text-xl xl:text-2xl font-medium hover:bg-white hover:text-black transition-all duration-300 shadow-xl"
+        >
+          {isAuthOpen ? "I will join later" : "Get Started"}
         </button>
       </motion.div>
 
-      <motion.div
-        className="hidden lg:block absolute right-12 xl:right-20 top-1/2 -translate-y-1/2 z-30"
-        initial={{ opacity: 0, x: 140 }}
-        whileInView={{ opacity: 0.9, x: 0 }}
-        viewport={{ amount: 0.3, once: false }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.3 }}
-      >
-        <StepperBox steps={guideSteps} />
-      </motion.div>
-      
-      {/* Corrected Background to Black */}
+      {/* Right Interaction Content */}
+      <div className="hidden lg:block absolute right-12 xl:right-20 top-1/2 -translate-y-1/2 z-30 w-112.5 xl:w-137.5">
+        <AnimatePresence mode="wait">
+          {!isAuthOpen ? (
+            <motion.div
+              key="stepper-desk"
+              className="hidden lg:block absolute right-12 xl:right-20 top-1/2 -translate-y-1/2 z-30"
+              initial={{ opacity: 0, x: 140 }}
+              whileInView={{ opacity: 0.9, x: 0 }}
+              viewport={{ amount: 0.3, once: false }}
+              transition={{
+                duration: 0.8,
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: 0.3,
+              }}
+            >
+              <StepperBox steps={guideSteps} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="auth-desk"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <FormContainer role="guide" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Pure Black Background */}
       <div className="absolute inset-0 z-0 bg-black" />
     </div>
   );

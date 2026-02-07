@@ -34,10 +34,10 @@ const LandingPage = ({ scrollContainerRef }) => {
           y: textY,
           willChange: "transform",
         }}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ 
-          duration: 1.5, 
+          duration: 2.5, 
           ease: [0.25, 0.1, 0.25, 1],
         }}
         className="font-bold text-white relative z-10
@@ -45,8 +45,8 @@ const LandingPage = ({ scrollContainerRef }) => {
                    -translate-x-2 -translate-y-8
                    sm:-translate-x-3 sm:-translate-y-12
                    md:-translate-x-4 md:-translate-y-10
-                   lg:-translate-x-8 lg:-translate-y-20
-                   xl:-translate-x-12 xl:-translate-y-35"
+                   lg:-translate-x-8 lg:-translate-y-15
+                   xl:-translate-x-12 xl:-translate-y-25"
       >
         GuideHub
       </motion.h1>
