@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import RegistrationBox from './Register';
 import LoginBox from './Login';
 
-const FormContainer = ({ role = "trekker" }) => {
+const FormContainer = ({ role = "trekker"  , onLoginSuccess}) => {
   const [authMode, setAuthMode] = useState('register'); // 'login' or 'register'
 
   return (
@@ -17,7 +17,10 @@ const FormContainer = ({ role = "trekker" }) => {
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.3 }}
           >
-            <LoginBox onSwitchToRegister={() => setAuthMode('register')} />
+            <LoginBox 
+              onSwitchToRegister={() => setAuthMode('register')} 
+              onLoginSuccess={onLoginSuccess}   
+            />
           </motion.div>
         ) : (
           <motion.div

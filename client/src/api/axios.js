@@ -7,7 +7,7 @@ const api = axios.create({
 api.interceptors.request.use(
   
   (config) => {
-    console.log("API Base URL:", import.meta.env.VITE_API_BASE);
+   
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
 

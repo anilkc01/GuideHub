@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import api from "../../api/axios";
+import {  useNavigate } from 'react-router-dom';
 
-const LoginBox = ({ onSwitchToRegister }) => {
+const LoginBox = ({ onSwitchToRegister, onLoginSuccess }) => {
   const [stage, setStage] = useState(1); // 1: Email, 2: Password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
   const inputStyle = "w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-white placeholder-white/20 outline-none focus:border-white/40 focus:bg-white/[0.07] transition-all duration-300 text-base";
 
   // Step 1: Verify Email
@@ -44,9 +46,8 @@ const LoginBox = ({ onSwitchToRegister }) => {
       toast.success(`Welcome back, ${user.fullName}!`);
       
       // Redirect or refresh state here
-      setTimeout(() => {
-        window.location.href = "/dashboard"; // or use navigate()
-      }, 1500);
+      onLoginSuccess?.();
+      navigate("/", { replace: true });
 
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
@@ -57,7 +58,7 @@ const LoginBox = ({ onSwitchToRegister }) => {
 
   return (
     <div className="w-full min-h-100 flex flex-col justify-center bg-white/5 backdrop-blur-3xl p-8 lg:p-12 rounded-2xl lg:rounded-[50px] border border-white/10 shadow-2xl">
-      <Toaster />
+      
       <h2 className="text-2xl lg:text-3xl font-serif text-white mb-8 text-center tracking-wide">
         {stage === 1 ? "Welcome Back" : "Enter Password"}
       </h2>

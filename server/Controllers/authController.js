@@ -8,7 +8,7 @@ import OTP from "../Models/Otp.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { fullName, email, phone, password, dob, address } = req.body;
+    const { fullName, email, phone, password, dob, address, role } = req.body;
 
     if (!fullName || !email || !phone || !password || !dob || !address) {
       return res.status(400).json({ message: "All fields are required." });
@@ -29,7 +29,7 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
       dob,
       address,
-      role: "trekker", 
+      role: role, 
     });
 
     res.status(201).json({ 

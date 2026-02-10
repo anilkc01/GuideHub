@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../Models/User.js";
+import TrekPlan from "../Models/TrekPlan.js";
 
 
 export const protect = async (req, res, next) => {
@@ -68,3 +69,26 @@ export const requireAdmin = (req, res, next) => {
   next();
 };
 
+export const requireOwner = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const plan = await TrekPlan.findByPk(id);
+
+    if (!plan) {
+      return res.status(404).json({ message: "Trek plan not found." });
+    }
+
+    if (plan.trekkerId !== userId) {
+      return res.status(403).json({ 
+        message: "Access denied. You do not own this trek plan." 
+      });
+    }
+
+    req.plan = plan;
+    next();
+  } catch (error) {
+    console.log("Ownership check error:", error);
+    res.status(500).json({ message: "Server error during ownership check." });
+  }
+};

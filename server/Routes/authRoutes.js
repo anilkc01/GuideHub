@@ -9,7 +9,7 @@ Router.post("/register", registerUser);
 Router.post("/register-guide", uploadGuideDocs, registerGuide);
 Router.post("/verify-email", verifyEmail);
 Router.post("/verify-password", verifyPassword);
-Router.post("/verify-token", verifyToken);
+Router.get("/verify-token",protect, verifyToken);
 Router.post("/delete-account", protect, deleteAccount);
 Router.post("/get-otp", getOtp);
 Router.post("/verify-otp", verifyOtp);
