@@ -12,7 +12,7 @@ const guideSteps = [
   { title: "Build Brand", desc: "Earn top ratings to attract more high-paying trekkers." },
 ];
 
-const GuideWelcome = () => {
+const GuideWelcome = ({ onLoginSuccess }) => {
   const ref = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -126,7 +126,7 @@ const GuideWelcome = () => {
               exit={{ opacity: 0, scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
-              <FormContainer role="guide" />
+              <FormContainer role="guide" onLoginSuccess={onLoginSuccess} />
             </motion.div>
           )}
         </AnimatePresence>

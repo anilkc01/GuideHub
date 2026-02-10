@@ -4,7 +4,7 @@ import LandingPage from "./welcome/IntroPage";
 import TrekkerWelcome from "./welcome/TrekkerIntro";
 import Navbar from "./GuestNavBar";
 
-const GuestLayout = () => {
+const GuestLayout = ({ onLoginSuccess }) => {
   const scrollContainerRef = useRef(null);
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollTop = useRef(0);
@@ -15,10 +15,10 @@ const GuestLayout = () => {
 
     const handleScroll = () => {
       const { scrollTop, clientHeight } = container;
-      
+
       // 1. Check if we are perfectly snapped to any page
       const isSnapped = Math.abs(scrollTop % clientHeight) < 10;
-      
+
       // 2. Determine scroll direction
       const isScrollingDown = scrollTop > lastScrollTop.current;
 
@@ -42,8 +42,9 @@ const GuestLayout = () => {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Passing the calculated visibility to your Navbar */}
-      <Navbar isVisible={showNavbar} />
+      <div className="hidden sm:block">
+        <Navbar isVisible={showNavbar} />
+      </div>
 
       <div
         ref={scrollContainerRef}
@@ -57,10 +58,10 @@ const GuestLayout = () => {
           <LandingPage scrollContainerRef={scrollContainerRef} />
         </div>
         <div className="h-screen w-full snap-start snap-always">
-          <TrekkerWelcome scrollContainerRef={scrollContainerRef} />
+          <TrekkerWelcome scrollContainerRef={scrollContainerRef} onLoginSuccess={onLoginSuccess}/>
         </div>
         <div className="h-screen w-full snap-start snap-always">
-          <GuideWelcome scrollContainerRef={scrollContainerRef} />
+          <GuideWelcome scrollContainerRef={scrollContainerRef} onLoginSuccess={onLoginSuccess} />
         </div>
       </div>
     </div>

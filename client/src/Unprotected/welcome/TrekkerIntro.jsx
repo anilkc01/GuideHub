@@ -20,14 +20,16 @@ const stepperData = [
     title: "Choose your Guide",
     desc: "Pick a guide with best idea, budget and good for you.",
   },
-  { title: "Go to Trek", desc: "Hit the trail with the guide you choose." },
+  { 
+    title: "Go to Trek", 
+    desc: "Hit the trail with the guide you choose for best experience." },
   {
     title: "Review",
     desc: "Leave review of your guide and post blogs of your trek.",
   },
 ];
 
-const TrekkerWelcome = () => {
+const TrekkerWelcome = ({ onLoginSuccess }) => {
   const ref = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -141,7 +143,7 @@ const TrekkerWelcome = () => {
               exit={{ opacity: 0, scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
-              <FormContainer role="trekker" />
+              <FormContainer role="trekker" onLoginSuccess={onLoginSuccess} />
             </motion.div>
           )}
         </AnimatePresence>

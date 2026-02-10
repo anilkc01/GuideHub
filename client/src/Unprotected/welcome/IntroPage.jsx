@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 
 const LandingPage = ({ scrollContainerRef }) => {
   const ref = useRef(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: ref,
     container: scrollContainerRef,
@@ -12,17 +12,9 @@ const LandingPage = ({ scrollContainerRef }) => {
   });
 
   // Smoother transforms
-  const backgroundY = useTransform(
-    scrollYProgress, 
-    [0, 1], 
-    ["0%", "100%"]
-  );
-  
-  const textY = useTransform(
-    scrollYProgress, 
-    [0, 1], 
-    ["0%", "300%"]
-  );
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "300%"]);
 
   return (
     <div
@@ -30,14 +22,14 @@ const LandingPage = ({ scrollContainerRef }) => {
       className="w-full h-screen overflow-hidden relative grid place-items-center"
     >
       <motion.h1
-        style={{ 
+        style={{
           y: textY,
           willChange: "transform",
         }}
         initial={{ opacity: 1, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ 
-          duration: 2.5, 
+        transition={{
+          duration: 2.5,
           ease: [0.25, 0.1, 0.25, 1],
         }}
         className="font-bold text-white relative z-10
@@ -79,6 +71,32 @@ const LandingPage = ({ scrollContainerRef }) => {
           transform: "translateZ(0)",
         }}
       />
+
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.5 }}
+        className="absolute bottom-12 md:bottom-20 z-30 flex flex-col items-center text-center px-6 w-full max-w-4xl"
+      >
+        {/* Description Text */}
+        <p className="text-white text-lg md:text-xl lg:text-2xl font-light leading-relaxed mb-8 drop-shadow-lg">
+          Stop following rigid itineraries. Post your dream trek, receive bids
+          from expert local guides, and{" "}
+          <strong className="font-semibold text-white">
+            build a journey that fits you.
+          </strong>
+        </p>
+
+        {/* Learn More Button */}
+        <motion.button
+          whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6",  color: "#111827" }}
+          whileTap={{ scale: 0.95 }}
+          className="px-10 py-4 bg-white/10 text-white font-bold rounded-full 
+               transition-colors shadow-[0_10px_20px_rgba(0,0,0,0.3)] text-lg uppercase tracking-wider"
+        >
+          Learn More
+        </motion.button>
+      </motion.div>
     </div>
   );
 };
