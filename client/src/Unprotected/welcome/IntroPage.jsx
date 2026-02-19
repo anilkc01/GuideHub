@@ -91,7 +91,7 @@ const LandingPage = ({ scrollContainerRef }) => {
         <motion.button
           whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6",  color: "#111827" }}
           whileTap={{ scale: 0.95 }}
-          className="px-10 py-4 bg-white/10 text-white font-bold rounded-full 
+          className="px-5 py-3 bg-white/10 text-white font-bold rounded-full 
                transition-colors shadow-[0_10px_20px_rgba(0,0,0,0.3)] text-lg uppercase tracking-wider"
         >
           Learn More

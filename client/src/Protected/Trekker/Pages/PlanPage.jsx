@@ -68,7 +68,7 @@ const MyPlanDetails = ({ onLogout }) => {
 
       <main className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <div className="lg:col-span-8 bg-zinc-900/40 border border-white/10 rounded-[2rem] p-6 md:p-8">
+        <div className="lg:col-span-8 bg-zinc-900/40 border border-white/10 rounded-4xl p-6 md:p-8">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-2xl md:text-3xl font-serif font-bold mb-3 tracking-tight">
@@ -110,7 +110,7 @@ const MyPlanDetails = ({ onLogout }) => {
               <h3 className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-black mb-4">Itinerary</h3>
               <div className="grid grid-cols-1 gap-3">
                 {plan?.itinerary?.map((item, idx) => (
-                  <div key={idx} className="flex gap-4 p-4 bg-white/[0.02] rounded-2xl border border-white/5">
+                  <div key={idx} className="flex gap-4 p-4 bg-white/2 rounded-2xl border border-white/5">
                     <span className="text-sm font-serif italic text-white/20">0{idx + 1}</span>
                     <p className="text-[13px] font-bold text-white/80">{item.activity}</p>
                   </div>
@@ -120,9 +120,9 @@ const MyPlanDetails = ({ onLogout }) => {
           </div>
         </div>
 
-        <aside className="lg:col-span-4 bg-zinc-900/40 border border-white/10 rounded-[2rem] p-6 h-full min-h-[400px]">
+        <aside className="lg:col-span-4 bg-zinc-900/40 border border-white/10 rounded-4xl p-6 h-full min-h-100">
           <h3 className="text-xl font-serif font-bold mb-6">Bids</h3>
-          <div className="flex flex-col items-center justify-center py-20 text-zinc-600 border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
+          <div className="flex flex-col items-center justify-center py-20 text-zinc-600 border border-dashed border-white/10 rounded-2xl bg-white/1">
             <p className="font-black text-[10px] uppercase tracking-widest mb-1">Waiting for guides</p>
             <p className="text-[10px] opacity-60">Offers will appear here shortly</p>
           </div>
