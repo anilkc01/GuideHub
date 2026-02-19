@@ -7,6 +7,7 @@ import { Route, Routes } from "react-router-dom";
 import api from "./api/axios";
 import TrekkerDashboard from "./Protected/Trekker/TrekkerDashboard";
 import MyPlanDetails from "./Protected/Trekker/Pages/PlanPage";
+import ExplorePlanDetails from "./Protected/Guides/Pages/PlanDetail";
 
 const App = () => {
   const [authChecked, setAuthChecked] = useState(false);
@@ -31,7 +32,11 @@ const App = () => {
       setAuthorized(true);
       setRole(res.data.user.role);
     } catch (err) {
-      toast.error("Session expired. Please log in again.");
+      toast.error("Session expired. Please log in again.", {
+        id: "auth-error",
+      });
+      localStorage.clear();
+      sessionStorage.clear();
       setAuthorized(false);
       setRole(null);
     } finally {
@@ -73,10 +78,14 @@ const App = () => {
 
       {/* Guide */}
       {authorized && role === "guide" && (
-        <Route
-          path="/"
-          element={<GuideDashboard onLogout={checkAuth} />}
-        ></Route>
+        <>
+          <Route path="/" element={<GuideDashboard onLogout={checkAuth} />} />
+          <Route
+            path="/explore/:id"
+            element={<ExplorePlanDetails onLogout={checkAuth} />}
+          />
+          
+        </>
       )}
     </Routes>
   );
