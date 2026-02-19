@@ -127,3 +127,37 @@ export const getMyPlans = async (req, res) => {
     res.status(500).json({ message: "Fetch failed", error: error.message });
   }
 };
+
+export const explorePlans = async (req, res) => {
+  try {
+    const plans = await TrekPlan.findAll({
+      where: { status: "open" },
+      attributes: [
+        "id", 
+        "title", 
+        "estBudget", 
+        "timePlanned", 
+        "location", 
+        "itinerary",
+        "description",
+      ],
+      include: [
+        {
+          model: User,
+          as: "trekker",
+          attributes: ["fullName", "id"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const formattedPlans = plans.map(plan => ({
+      ...plan.toJSON(),
+      days: plan.itinerary?.length || 0
+    }));
+
+    res.status(200).json(formattedPlans);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch explore plans", error: error.message });
+  }
+};
