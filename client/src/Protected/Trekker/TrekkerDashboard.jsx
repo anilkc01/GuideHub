@@ -6,16 +6,11 @@ import { useState } from "react";
 import MyActivePlans from "./components/ActivePlansList";
 
 const TrekkerDashboard = ({ onLogout }) => {
-  const navigate = useNavigate();
+
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleLogoutAction = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    onLogout();
-    navigate("/");
-  };
+
 
   const userData = JSON.parse(localStorage.getItem("user"));
 
@@ -24,7 +19,7 @@ const TrekkerDashboard = ({ onLogout }) => {
     <div
       className={`min-h-screen bg-black text-white pt-24 sm:pt-28 transition-all duration-500 ${isModalOpen ? "opacity-90 scale-100" : "opacity-100 scale-100"}`}
     >
-      <TrekkerNavBar user={userData} onLogout={handleLogoutAction} />
+      <TrekkerNavBar user={userData} onLogout={onLogout} />
 
       <PlanTrekForm
         isOpen={isModalOpen}

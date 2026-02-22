@@ -1,7 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TrekkerNavBar = ({ user, onLogout }) => {
+
+  const navigate = useNavigate();
+
+    const handleLogoutAction = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    onLogout();
+    navigate("/");
+  };
   return (
     <nav 
       className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-2 lg:px-10 lg:py-3 
@@ -59,7 +68,7 @@ const TrekkerNavBar = ({ user, onLogout }) => {
             {/* Logout Dropdown */}
             <div className="absolute right-0 top-14 hidden group-hover:block bg-zinc-900 border border-white/10 p-2 rounded-xl shadow-2xl min-w-30">
                <button 
-                 onClick={onLogout}
+                 onClick={handleLogoutAction}
                  className="w-full text-left text-xs text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
                >
                  Sign Out

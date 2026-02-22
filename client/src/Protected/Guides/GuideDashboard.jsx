@@ -1,9 +1,11 @@
 import React from "react";
 import GuideNavBar from "./GuideNavBar";
 import ExploreSection from "./Pages/Explore"; 
+import { useNavigate } from "react-router-dom";
 
 const GuideDashboard = ({ onLogout }) => {
   const userData = JSON.parse(localStorage.getItem("user"));
+
 
   return (
     <div className="min-h-screen bg-black text-white pt-28 pb-10 font-sans">
