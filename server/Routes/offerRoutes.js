@@ -2,7 +2,8 @@ import express from "express";
 import { 
   createOffer, 
   updateOffer, 
-  getOffersByPlan 
+  getOffersByPlan, 
+  acceptOffer
 } from "../Controllers/OfferController.js";
 
 import { protect } from "../Middlewares/auth.js";
@@ -10,7 +11,7 @@ import { protect } from "../Middlewares/auth.js";
 const router = express.Router();
 
 router.get("/plan/:id", protect, getOffersByPlan);
-
+router.put("/accept/:id", protect, acceptOffer);
 router.post("/", protect, createOffer);
 router.put("/:id", protect, updateOffer);
 
