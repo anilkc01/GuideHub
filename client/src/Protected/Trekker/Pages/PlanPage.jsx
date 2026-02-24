@@ -45,11 +45,12 @@ const MyPlanDetails = ({ onLogout }) => {
 
   const handleAcceptBid = async (offerId) => {
     try {
-      await api.put(`/offers/${offerId}/accept`);
-      toast.success("Offer accepted!");
-      fetchData();
+      // Calls the new transactional backend route
+      await api.put(`/offers/accept/${offerId}`);
+      toast.success("Trip Confirmed! Check your Trips dashboard.");
+      fetchData(); // Refresh to show 'Accepted' status and 'Ongoing' plan status
     } catch (err) {
-      toast.error("Failed to accept offer");
+      toast.error(err.response?.data?.message || "Failed to accept offer");
     }
   };
 
@@ -65,25 +66,19 @@ const MyPlanDetails = ({ onLogout }) => {
       <TrekkerNavBar user={userData} onLogout={onLogout} />
 
       <div className="flex-1 mt-20 px-6 max-w-7xl mx-auto w-full pb-6 overflow-hidden">
-        {/* Navigation */}
         <div className="flex items-center mt-4 mb-6">
           <button
             onClick={() => navigate(-1)}
             className="group flex items-center gap-3 text-zinc-400 hover:text-white transition-all bg-white/5 px-4 py-2 rounded-xl border border-white/5"
           >
             <ArrowLeft size={16} />
-            <span className="text-[11px] font-black uppercase tracking-widest">
-              Dashboard
-            </span>
+            <span className="text-[11px] font-black uppercase tracking-widest">Dashboard</span>
           </button>
         </div>
 
-        {/* 8/4 Grid Split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 h-[calc(100vh-180px)]">
-          
-          {/* LEFT: Trip Details (8 Columns) */}
+          {/* LEFT: Trip Details */}
           <div className="lg:col-span-8 overflow-y-auto pr-8 custom-scrollbar scroll-smooth">
-            {/* Title & Edit Section */}
             <div className="flex items-center justify-between gap-6 mb-6">
               <h1 className="text-4xl font-serif font-bold tracking-tight leading-tight italic">
                 {plan.title}
@@ -98,7 +93,6 @@ const MyPlanDetails = ({ onLogout }) => {
               )}
             </div>
 
-            {/* Metadata Pills */}
             <div className="flex flex-wrap gap-3 mb-10">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-300 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
                 <MapPin size={14} className="text-emerald-500" /> {plan.location}
@@ -109,27 +103,25 @@ const MyPlanDetails = ({ onLogout }) => {
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl">
                 <DollarSign size={14} /> {plan.estBudget} USD
               </div>
+              <div className={`flex items-center gap-2 text-[10px] font-black uppercase px-4 py-2 rounded-xl border ${
+                plan.status === 'open' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' : 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10'
+              }`}>
+                {plan.status}
+              </div>
             </div>
 
             <div className="space-y-12">
               <section>
-                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-4">
-                  The Objective
-                </h3>
+                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-4">The Objective</h3>
                 <p className="text-zinc-300 text-sm leading-relaxed font-medium bg-white/[0.02] p-5 rounded-3xl border border-white/5">
                   {plan.description}
                 </p>
               </section>
 
-              {/* STEPPER ITINERARY */}
               <section className="pb-20">
-                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-8">
-                  Planned Itinerary
-                </h3>
-
+                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-8">Planned Itinerary</h3>
                 <div className="relative ml-4 space-y-0">
                   <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-emerald-500/50 via-white/10 to-transparent" />
-
                   {plan?.itinerary?.map((item, idx) => (
                     <div key={idx} className="relative flex items-start gap-6 pb-4 last:pb-0 group">
                       <div className="relative z-10 flex-shrink-0 mt-1">
@@ -138,12 +130,8 @@ const MyPlanDetails = ({ onLogout }) => {
                         </div>
                       </div>
                       <div className="pt-0.5">
-                        <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-emerald-500 transition-colors">
-                          Day 0{idx + 1}
-                        </span>
-                        <p className="text-[14px] font-bold text-white/80 leading-relaxed max-w-md group-hover:text-white transition-colors">
-                          {item.activity}
-                        </p>
+                        <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-emerald-500 transition-colors">Day 0{idx + 1}</span>
+                        <p className="text-[14px] font-bold text-white/80 leading-relaxed max-w-md group-hover:text-white transition-colors">{item.activity}</p>
                       </div>
                     </div>
                   ))}
@@ -152,7 +140,7 @@ const MyPlanDetails = ({ onLogout }) => {
             </div>
           </div>
 
-          {/* RIGHT: Narrowed Bids Sidebar (4 Columns) */}
+          {/* RIGHT: Bids Sidebar */}
           <aside className="lg:col-span-4 flex flex-col h-full overflow-hidden bg-zinc-900/30 rounded-[2.5rem] border border-white/10 p-5 shadow-2xl shadow-black/50">
             <div className="flex items-center justify-between mb-6 px-1">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
@@ -166,17 +154,13 @@ const MyPlanDetails = ({ onLogout }) => {
                   <OfferCard
                     key={bid.id}
                     bid={bid}
+                    planStatus={plan.status} // Pass plan status to control buttons
                     onAccept={handleAcceptBid}
-                    onProfileClick={(guideId) =>
-                      navigate(`/profile/${guideId}`)
-                    }
                   />
                 ))
               ) : (
-                <div className="h-full border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center opacity-30">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500 text-center">
-                    Scanning for Guides...
-                  </p>
+                <div className="h-full border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center opacity-30 text-center">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">No offers yet</p>
                 </div>
               )}
             </div>

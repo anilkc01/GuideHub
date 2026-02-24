@@ -4,6 +4,7 @@ import { PlusCircle } from "lucide-react";
 import PlanTrekForm from "./components/PlanTrip";
 import { useState } from "react";
 import MyActivePlans from "./components/ActivePlansList";
+import MyTrips from "./components/myTripsList";
 
 const TrekkerDashboard = ({ onLogout }) => {
 
@@ -55,7 +56,7 @@ const TrekkerDashboard = ({ onLogout }) => {
                 </button>
               </div>
               {/* Background image placeholder */}
-              <div className="absolute inset-0 bg-[url('/src/assets/boxbg.jpg')] bg-cover bg-center opacity-60 group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-[url('/src/assets/boxbg.jpg')] bg-cover bg-center opacity-70 group-hover:scale-110 transition-transform duration-700" />
             </div>
 
             <div className="grid h-max grid-cols-1 md:grid-cols-2 gap-6">
@@ -69,6 +70,7 @@ const TrekkerDashboard = ({ onLogout }) => {
                 <h3 className="text-xl font-semibold mb-4 italic opacity-80 font-serif">
                   My Trips
                 </h3>
+                <MyTrips />
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@ import AdminDashboard from "./Protected/Admin/AdminDashboard";
 import GuideDashboard from "./Protected/Guides/GuideDashboard";
 import GuestLayout from "./Unprotected/GuestLayout";
 import toast from "react-hot-toast";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import api from "./api/axios";
 import TrekkerDashboard from "./Protected/Trekker/TrekkerDashboard";
 import MyPlanDetails from "./Protected/Trekker/Pages/PlanPage";
@@ -69,10 +69,8 @@ const App = () => {
       {authorized && role === "trekker" && (
         <>
           <Route path="/" element={<TrekkerDashboard onLogout={checkAuth} />} />
-          <Route
-            path="/myPlan/:id"
-            element={<MyPlanDetails onLogout={checkAuth} />}
-          />
+          <Route path="/myPlan/:id" element={<MyPlanDetails onLogout={checkAuth} />}/>
+          <Route path="*" element={<Navigate to="/" />} />
         </>
       )}
 
@@ -80,11 +78,8 @@ const App = () => {
       {authorized && role === "guide" && (
         <>
           <Route path="/" element={<GuideDashboard onLogout={checkAuth} />} />
-          <Route
-            path="/explore/:id"
-            element={<ExplorePlanDetails onLogout={checkAuth} />}
-          />
-          
+          <Route path="/explore/:id" element={<ExplorePlanDetails onLogout={checkAuth} />}/>
+          <Route path="*" element={<Navigate to="/" />} />
         </>
       )}
     </Routes>

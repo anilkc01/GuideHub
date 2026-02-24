@@ -10,7 +10,6 @@ const MyActivePlans = () => {
   const fetchPlans = async () => {
     try {
       const response = await api.get("/plans/my-plans");
-      // Filter for only 'open' status if you want strictly active ones
       setPlans(response.data);
     } catch (error) {
       console.error("Error fetching plans:", error);
