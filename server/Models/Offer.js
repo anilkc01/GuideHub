@@ -39,7 +39,7 @@ const Offer = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("pending", "accepted", "rejected"),
+      type: DataTypes.ENUM("pending", "accepted", "rejected", "cancelled"),
       defaultValue: "pending",
     },
   },

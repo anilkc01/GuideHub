@@ -28,3 +28,37 @@ export const getMyTrips = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch trips", error: error.message });
   }
 };
+
+export const getGuideTrips = async (req, res) => {
+  try {
+    const guideId = req.user.id;
+    const trips = await Trip.findAll({
+      where: { guideId },
+      include: [
+        {
+          model: TrekPlan,
+          attributes: ['title', 'location', 'estBudget', 'itinerary', 'description']
+        },
+        {
+          model: User,
+          as: 'trekker',
+          attributes: ['fullName', 'dp', 'rating']
+        }
+      ],
+      order: [['startDate', 'ASC']]
+    });
+
+    const formattedTrips = trips.map(t => ({
+      ...t.TrekPlan.toJSON(),
+      tripId: t.id,
+      status: t.status,
+      startDate: t.startDate,
+      endDate: t.endDate,
+      trekker: t.trekker
+    }));
+
+    res.json(formattedTrips);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assigned treks" });
+  }
+};
