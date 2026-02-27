@@ -1,112 +1,181 @@
-
+import { Op } from "sequelize";
 import { sequelize } from "../Database/database.js";
 import Rating from "../Models/Ratings.js";
 import TrekPlan from "../Models/TrekPlan.js";
+import Trip from "../Models/Trips.js";
 import User from "../Models/User.js";
 import UserReport from "../Models/UserReports.js";
 
-// Get Profile for the UserDetailCard
 export const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const profile = await User.findByPk(userId, {
-      attributes: { exclude: ["password"] },
-      include: [
-        {
-          model: Rating,
-          as: "receivedRatings",
-          include: [
-            {
-              model: User,
-              as: "reviewer",
-              attributes: ["fullName", "dp"],
-            },
-          ],
-        },
+      attributes: [
+        "id",
+        "fullName",
+        "email",
+        "phone",
+        "address",
+        "dp",
+        "rating",
+        "status",
+        "createdAt",
       ],
-      order: [[ { model: Rating, as: "receivedRatings" }, "createdAt", "DESC"]]
     });
 
-    if (!profile) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!profile) return res.status(404).json({ message: "User not found" });
 
-    // Calculate Statistics for GuideHub Stats Section
-    // For a Guide: Number of completed treks they were part of
-    // For a Trekker: Number of plans they created
-    const completedTreks = await TrekPlan.count({
-      where: { 
+    const completedTreks = await Trip.count({
+      where: {
         status: "completed",
-        // This logic assumes we might eventually have a guideId on TrekPlan
-        // For now, let's count plans associated with this user
-        trekkerId: userId 
-      }
+        [Op.or]: [{ trekkerId: userId }, { guideId: userId }],
+      },
     });
 
-    // Mocking experience based on account age or a specific field if you add one later
-    const accountAge = Math.floor((new Date() - new Date(profile.createdAt)) / (1000 * 60 * 60 * 24 * 365));
-    
-    // Combine everything into the format the frontend expects
-    const responseData = {
-      ...profile.toJSON(),
-      isVerified: profile.status === "active", // Or based on your specific verification logic
-      stats: {
-        completedTreks: completedTreks || 0,
-        experience: accountAge > 0 ? accountAge : 1,
-      },
-      reviews: profile.receivedRatings.map(r => ({
-        id: r.id,
-        rating: r.stars,
-        comment: r.review,
-        reviewer: r.reviewer
-      }))
-    };
+    const years =
+      new Date().getFullYear() - new Date(profile.createdAt).getFullYear();
 
-    res.status(200).json(responseData);
+    res.status(200).json({
+      ...profile.toJSON(),
+      stats: {
+        completedTreks,
+        experience: years > 0 ? years : 1,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching profile", error: error.message });
+    res.status(500).json({ message: "Error", error: error.message });
   }
 };
 
-// Handle Rating/Review Submission
+export const getTrekkerStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const openPlans = await TrekPlan.count({
+      where: {
+        trekkerId: userId,
+        status: "open",
+      },
+    });
+
+    const upcomingTrips = await Trip.count({
+      where: {
+        trekkerId: userId,
+        status: ["upcoming"],
+      },
+    });
+
+    const completedTrips = await Trip.count({
+      where: {
+        trekkerId: userId,
+        status: "completed",
+      },
+    });
+
+    res.status(200).json({
+      openPlans,
+      upcomingTrips,
+      completedTreks: completedTrips,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching stats", error: error.message });
+  }
+};
+
+export const getUserReviews = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const reviews = await Rating.findAll({
+      where: { ratingTo: userId },
+      include: [
+        {
+          model: User,
+          as: "reviewer",
+          attributes: ["fullName", "dp"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const formatted = reviews.map((r) => ({
+      id: r.id,
+      stars: r.stars,
+      review: r.review,
+      reviewer: r.reviewer,
+    }));
+
+    res.status(200).json(formatted);
+  } catch (error) {
+    res.status(500).json({ message: "Error", error: error.message });
+  }
+};
+
 export const rateUser = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { userId } = req.params; // The guide being rated
+    const { userId } = req.params;
     const { rating, comment } = req.body;
-    const reviewerId = req.user.id; // From auth middleware
+    const reviewerId = req.user.id;
 
     if (reviewerId == userId) {
       return res.status(400).json({ message: "You cannot rate yourself" });
     }
 
-    // Create the rating
-    await Rating.create({
-      ratingFrom: reviewerId,
-      ratingTo: userId,
-      stars: rating,
-      review: comment
-    }, { transaction: t });
+    const existingRating = await Rating.findOne({
+      where: {
+        ratingFrom: reviewerId,
+        ratingTo: userId,
+      },
+      transaction: t,
+    });
 
-    // Update the User's aggregate rating
+    if (existingRating) {
+      // UPDATE EXISTING
+      await existingRating.update(
+        {
+          stars: rating,
+          review: comment,
+        },
+        { transaction: t },
+      );
+    } else {
+      await Rating.create(
+        {
+          ratingFrom: reviewerId,
+          ratingTo: userId,
+          stars: rating,
+          review: comment,
+        },
+        { transaction: t },
+      );
+    }
+
     const avgRating = await Rating.findAll({
       where: { ratingTo: userId },
       attributes: [[sequelize.fn("AVG", sequelize.col("stars")), "avgStars"]],
       raw: true,
-      transaction: t
+      transaction: t,
     });
 
+    const newAvg = avgRating[0].avgStars
+      ? parseFloat(avgRating[0].avgStars).toFixed(1)
+      : rating;
+
     await User.update(
-      { rating: parseFloat(avgRating[0].avgStars).toFixed(1) },
-      { where: { id: userId }, transaction: t }
+      { rating: newAvg },
+      { where: { id: userId }, transaction: t },
     );
 
     await t.commit();
-    res.status(201).json({ message: "Review posted successfully" });
+    res.status(200).json({
+      message: existingRating ? "Review updated" : "Review posted",
+    });
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ message: "Rating failed", error: error.message });
+    res.status(500).json({ message: "Operation failed", error: error.message });
   }
 };
 
@@ -120,7 +189,7 @@ export const reportUser = async (req, res) => {
       fromId,
       toId: reportedUserId,
       category: reason,
-      description: description
+      description: description,
     });
 
     res.status(201).json({ message: "User reported to admins" });
