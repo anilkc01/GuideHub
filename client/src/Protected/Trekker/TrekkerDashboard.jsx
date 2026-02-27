@@ -1,19 +1,37 @@
 import { useNavigate } from "react-router-dom";
 import TrekkerNavBar from "./TrekkerNavBar";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, BadgeCheck, MapPin } from "lucide-react";
 import PlanTrekForm from "./components/PlanTrip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MyActivePlans from "./components/ActivePlansList";
 import MyTrips from "./components/myTripsList";
+import api from "../../api/axios";
 
 const TrekkerDashboard = ({ onLogout }) => {
-
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-
+  const [stats, setStats] = useState({
+    openPlans: 0,
+    upcomingTrips: 0,
+    completedTreks: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
 
   const userData = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get("/user/stats");
+      setStats(res.data);
+    } catch (err) {
+      console.error("Stats fetch failed");
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   return (
     // Added pt-24 (96px) to ensure content starts below the fixed navbar
@@ -77,11 +95,56 @@ const TrekkerDashboard = ({ onLogout }) => {
 
           {/* Sidebar Area */}
           <aside className="lg:col-span-4 space-y-8">
-            <div className="p-8 bg-zinc-900/50 rounded-4xl border border-white/5 min-h-75">
-              <h3 className="text-xl font-bold mb-6">Your Stats</h3>
-              <div className="space-y-4">
-                <div className="h-20 bg-white/5 rounded-2xl border border-white/5"></div>
-                <div className="h-20 bg-white/5 rounded-2xl border border-white/5"></div>
+            <div className="p-6 bg-zinc-900/50 rounded-[2rem] border border-white/5">
+              <h3 className="text-lg font-bold mb-4 font-serif italic">
+                Your Journey
+              </h3>
+
+              <div className="grid grid-cols-1 gap-3">
+                {/* Completed Treks */}
+                <div className="p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10 flex items-center justify-between group hover:bg-emerald-500/10 transition-all">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/60">
+                      Total Completed
+                    </p>
+                    <h4 className="text-2xl font-bold leading-tight">
+                      {loadingStats ? "..." : stats.completedTreks}
+                    </h4>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                    <BadgeCheck size={20} />
+                  </div>
+                </div>
+
+                {/* Active Plans */}
+                <div className="p-3 bg-blue-500/5 rounded-xl border border-blue-500/10 flex items-center justify-between group hover:bg-blue-500/10 transition-all">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-blue-500/60">
+                      Open Plans
+                    </p>
+                    <h4 className="text-2xl font-bold leading-tight">
+                      {loadingStats ? "..." : stats.openPlans}
+                    </h4>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <PlusCircle size={20} />
+                  </div>
+                </div>
+
+                {/* Upcoming Trips */}
+                <div className="p-3 bg-purple-500/5 rounded-xl border border-purple-500/10 flex items-center justify-between group hover:bg-purple-500/10 transition-all">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-purple-500/60">
+                      Upcoming Trips
+                    </p>
+                    <h4 className="text-2xl font-bold leading-tight">
+                      {loadingStats ? "..." : stats.upcomingTrips}
+                    </h4>
+                  </div>
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
+                    <MapPin size={20} />
+                  </div>
+                </div>
               </div>
             </div>
 

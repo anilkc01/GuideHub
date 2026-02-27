@@ -19,3 +19,33 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
+
+/* React Quill Dark Mode Reset */
+.ql-toolbar.ql-snow {
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: transparent !important;
+  padding: 15px !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+  font-size: 16px !important;
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+.ql-editor.ql-blank::before {
+  color: #3f3f46 !important; /* zinc-700 */
+  font-style: normal !important;
+}
+
+/* Make toolbar icons visible in dark mode */
+.ql-snow .ql-stroke { stroke: #71717a !important; }
+.ql-snow .ql-fill { fill: #71717a !important; }
+.ql-snow .ql-picker { color: #71717a !important; }
+
+/* Active Emerald color */
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke {
+  stroke: #10b981 !important;
+}

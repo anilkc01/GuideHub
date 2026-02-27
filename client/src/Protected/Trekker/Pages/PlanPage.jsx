@@ -7,6 +7,7 @@ import {
   DollarSign,
   Edit3,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import api from "../../../api/axios";
 import TrekkerNavBar from "../TrekkerNavBar";
@@ -21,6 +22,8 @@ const MyPlanDetails = ({ onLogout }) => {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const userData = JSON.parse(localStorage.getItem("user"));
 
   const fetchData = async () => {
@@ -54,6 +57,17 @@ const MyPlanDetails = ({ onLogout }) => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/plans/${id}`);
+      toast.success("Plan cancelled");
+      navigate("/"); // Redirect to dashboard
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Delete failed");
+      setIsDeleting(false);
+    }
+  };
+
   if (loading)
     return (
       <div className="h-screen bg-black flex items-center justify-center">
@@ -72,7 +86,9 @@ const MyPlanDetails = ({ onLogout }) => {
             className="group flex items-center gap-3 text-zinc-400 hover:text-white transition-all bg-white/5 px-4 py-2 rounded-xl border border-white/5"
           >
             <ArrowLeft size={16} />
-            <span className="text-[11px] font-black uppercase tracking-widest">Dashboard</span>
+            <span className="text-[11px] font-black uppercase tracking-widest">
+              Dashboard
+            </span>
           </button>
         </div>
 
@@ -84,54 +100,101 @@ const MyPlanDetails = ({ onLogout }) => {
                 {plan.title}
               </h1>
               {plan.status === "open" && (
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-3 bg-white/5 rounded-2xl border border-white/10 hover:bg-white hover:text-black transition-all group shadow-xl shadow-white/5"
-                >
-                  <Edit3 size={18} />
-                </button>
+                <div className="flex gap-2">
+                  {!isDeleting ? (
+                    <>
+                      <button
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="p-3 bg-white/5 rounded-2xl border border-white/10 hover:bg-white hover:text-black transition-all"
+                      >
+                        <Edit3 size={18} />
+                      </button>
+                      <button
+                        onClick={() => setIsDeleting(true)}
+                        className="p-3 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 p-2 rounded-2xl animate-in fade-in zoom-in-95">
+                      <span className="text-[9px] font-black uppercase px-2 text-red-500">
+                        Cancel Plan?
+                      </span>
+                      <button
+                        onClick={handleDelete}
+                        className="px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase rounded-lg"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setIsDeleting(false)}
+                        className="px-3 py-1 bg-white/10 text-white text-[9px] font-black uppercase rounded-lg"
+                      >
+                        No
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
             <div className="flex flex-wrap gap-3 mb-10">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-300 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                <MapPin size={14} className="text-emerald-500" /> {plan.location}
+                <MapPin size={14} className="text-emerald-500" />{" "}
+                {plan.location}
               </div>
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-zinc-300 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                <Calendar size={14} className="text-emerald-500" /> {plan.timePlanned}
+                <Calendar size={14} className="text-emerald-500" />{" "}
+                {plan.timePlanned}
               </div>
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl">
                 <DollarSign size={14} /> {plan.estBudget} USD
               </div>
-              <div className={`flex items-center gap-2 text-[10px] font-black uppercase px-4 py-2 rounded-xl border ${
-                plan.status === 'open' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' : 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10'
-              }`}>
+              <div
+                className={`flex items-center gap-2 text-[10px] font-black uppercase px-4 py-2 rounded-xl border ${
+                  plan.status === "open"
+                    ? "text-blue-400 border-blue-500/20 bg-blue-500/10"
+                    : "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                }`}
+              >
                 {plan.status}
               </div>
             </div>
 
             <div className="space-y-12">
               <section>
-                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-4">The Objective</h3>
+                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-4">
+                  The Objective
+                </h3>
                 <p className="text-zinc-300 text-sm leading-relaxed font-medium bg-white/[0.02] p-5 rounded-3xl border border-white/5">
                   {plan.description}
                 </p>
               </section>
 
               <section className="pb-20">
-                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-8">Planned Itinerary</h3>
+                <h3 className="text-[11px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-8">
+                  Planned Itinerary
+                </h3>
                 <div className="relative ml-4 space-y-0">
                   <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-emerald-500/50 via-white/10 to-transparent" />
                   {plan?.itinerary?.map((item, idx) => (
-                    <div key={idx} className="relative flex items-start gap-6 pb-4 last:pb-0 group">
+                    <div
+                      key={idx}
+                      className="relative flex items-start gap-6 pb-4 last:pb-0 group"
+                    >
                       <div className="relative z-10 flex-shrink-0 mt-1">
                         <div className="w-[24px] h-[24px] rounded-full bg-black border border-white/20 flex items-center justify-center group-hover:border-emerald-500 transition-colors">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         </div>
                       </div>
                       <div className="pt-0.5">
-                        <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-emerald-500 transition-colors">Day 0{idx + 1}</span>
-                        <p className="text-[14px] font-bold text-white/80 leading-relaxed max-w-md group-hover:text-white transition-colors">{item.activity}</p>
+                        <span className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-emerald-500 transition-colors">
+                          Day 0{idx + 1}
+                        </span>
+                        <p className="text-[14px] font-bold text-white/80 leading-relaxed max-w-md group-hover:text-white transition-colors">
+                          {item.activity}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -144,7 +207,8 @@ const MyPlanDetails = ({ onLogout }) => {
           <aside className="lg:col-span-4 flex flex-col h-full overflow-hidden bg-zinc-900/30 rounded-[2.5rem] border border-white/10 p-5 shadow-2xl shadow-black/50">
             <div className="flex items-center justify-between mb-6 px-1">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                Offers <span className="text-emerald-500 ml-1">[{bids.length}]</span>
+                Offers{" "}
+                <span className="text-emerald-500 ml-1">[{bids.length}]</span>
               </h3>
             </div>
 
@@ -160,7 +224,9 @@ const MyPlanDetails = ({ onLogout }) => {
                 ))
               ) : (
                 <div className="h-full border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center opacity-30 text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">No offers yet</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                    No offers yet
+                  </p>
                 </div>
               )}
             </div>
