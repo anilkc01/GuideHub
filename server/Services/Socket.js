@@ -6,7 +6,7 @@ const userSocketMap = new Map(); // userId -> socketId
 export const initSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });
@@ -23,12 +23,17 @@ export const initSocket = (server) => {
     // Handle Private Messaging (Instagram Style)
     socket.on("sendMessage", async ({ senderId, receiverId, content }) => {
       try {
-        // 1. Persist to DB
+
+        if (!senderId || !receiverId || !content) {
+          console.error("Missing fields:", { senderId, receiverId, content });
+          return;
+        }
+
         const newMessage = await Message.create({
           senderId,
           receiverId,
           content,
-          status: "sent"
+          status: "sent",
         });
 
         // 2. Get Receiver's Socket ID

@@ -89,7 +89,7 @@ export const getOffersByPlan = async (req, res) => {
         {
           model: User,
           as: "bidder",
-          attributes: ["fullName", "dp", "rating"], // Specifically for your sidebar list
+          attributes: ["id","fullName", "dp", "rating"], // Specifically for your sidebar list
         },
       ],
       order: [["createdAt", "DESC"]], // Newest offers first

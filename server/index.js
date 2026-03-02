@@ -7,10 +7,18 @@ import userRoutes from "./Routes/userRoutes.js";
 import tripRoutes from "./Routes/tripRoutes.js";
 import blogRoutes from "./Routes/blogRoutes.js";
 import adminRoutes from "./Routes/adminRoutes.js";
+import chatRoutes from "./Routes/chatRoutes.js";
 import path from "path";
 import cors from "cors";
+import { createServer } from "http";
+import { initSocket } from "./Services/Socket.js";
+
 
 const app = express();
+
+const httpServer = createServer(app);
+
+initSocket(httpServer);
 app.use(express.json());
 
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -32,7 +40,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/chat", chatRoutes);
 
-app.listen(5002, () => {
-  console.log("Server running on port 5002");
+httpServer.listen(5002, () => {
+  console.log("Server & Socket running on port 5002");
 });

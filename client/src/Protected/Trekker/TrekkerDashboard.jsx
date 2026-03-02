@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import MyActivePlans from "./components/ActivePlansList";
 import MyTrips from "./components/myTripsList";
 import api from "../../api/axios";
+import ChatBox from "../Common/ChatBox";
+
 
 const TrekkerDashboard = ({ onLogout }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -148,11 +150,8 @@ const TrekkerDashboard = ({ onLogout }) => {
               </div>
             </div>
 
-            <div className="p-8 bg-zinc-900/50 rounded-4xl border border-white/5 min-h-100">
-              <h3 className="text-xl font-bold mb-6">Messages</h3>
-              <div className="flex flex-col items-center justify-center h-64 text-zinc-600">
-                <p>No new messages</p>
-              </div>
+           <div className="h-[650px] w-full rounded-4xl overflow-hidden border border-white/5">
+              <ChatBox currentUser={userData} />
             </div>
           </aside>
         </div>
