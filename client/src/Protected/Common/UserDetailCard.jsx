@@ -94,7 +94,7 @@ export const UserDetailCard = ({ userId, onClose }) => {
     try {
       const payload = { 
         reportedUserId: userId, 
-        reason: reportCategory, 
+        reason: reportCategory, // Changed from 'category' to 'reason'
         description: reportDesc 
       };
 
@@ -126,7 +126,7 @@ export const UserDetailCard = ({ userId, onClose }) => {
           <div className="relative mb-3">
             <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-white/10 bg-zinc-800">
               {data.dp ? (
-                <img src={`${API_BASE}/${data.dp}`} className="w-full h-full object-cover" alt="avatar" />
+                <img src={`http://localhost:5002/${data.dp}`} className="w-full h-full object-cover" alt="avatar" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-zinc-600"><UserIcon size={40} /></div>
               )}

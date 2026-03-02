@@ -4,6 +4,7 @@ import TrekPlan from "../Models/TrekPlan.js";
 import { Op } from "sequelize";
 import Trip from "../Models/Trips.js";
 import { sequelize } from "../Database/database.js";
+import { sendEmail } from "../Services/Email.js";
 
 // 1. Create a new bid
 export const createOffer = async (req, res) => {
@@ -167,6 +168,14 @@ export const acceptOffer = async (req, res) => {
     );
 
     await t.commit();
+    await sendEmail(
+      acceptedOffer.bidder.email,
+      "Offer Accepted - New Trip Scheduled!",
+      `<p>Congratulations ${acceptedOffer.bidder.fullName},</p>
+       <p>Your offer for the trek <strong>${plan.title || "Trip"}</strong> has been accepted.</p>
+       <p>Please check your dashboard for trip details.</p>`
+    );
+
     res.status(200).json({
       message: "Offer accepted! A new trip has been scheduled.",
       guideId: acceptedOffer.bidderId,

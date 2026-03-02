@@ -37,7 +37,7 @@ const Blog = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("published", "draft"),
+      type: DataTypes.ENUM("published", "hidden"),
       defaultValue: "published",
     },
   },
