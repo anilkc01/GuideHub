@@ -11,12 +11,12 @@ export const sendEmail = async (to, subject, htmlContent) => {
     });
 
     await transporter.sendMail({
-      from: `"AaWAS Support" <${process.env.EMAIL_USER}>`,
+      from: `"GuideHub Support" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #B59353;">AaWAS Real Estate</h2>
+          <h2 style="color: #B59353;">GuideHub</h2>
           <div style="font-size: 14px; color: #333;">
             ${htmlContent}
           </div>

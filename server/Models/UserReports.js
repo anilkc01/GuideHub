@@ -48,4 +48,8 @@ const UserReport = sequelize.define(
   }
 );
 
+UserReport.belongsTo(User, { foreignKey: "fromId", as: "reporter" });
+UserReport.belongsTo(User, { foreignKey: "toId", as: "reportedUser" });
+User.hasMany(UserReport, { foreignKey: "fromId", as: "filedReports" });
+
 export default UserReport;

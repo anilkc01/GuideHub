@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,16 +6,61 @@ import { registrationSchema } from "./schema.Registration";
 import toast, { Toaster } from "react-hot-toast";
 import api from "../../api/axios";
 
+// Helper Component for Image Previews in Rectangles
+const ImagePreview = ({ file, label, onChange, id, aspect = "aspect-video" }) => {
+  const [preview, setPreview] = useState(null);
+
+  useEffect(() => {
+    if (!file) {
+      setPreview(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+    // Free memory when component unmounts
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  return (
+    <div className={`flex flex-col gap-2 flex-1 ${aspect === 'aspect-square' ? 'items-center' : ''}`}>
+      <label className="text-white/40 text-[9px] uppercase font-black ml-1 tracking-widest">
+        {label}
+      </label>
+      <div
+        onClick={() => document.getElementById(id).click()}
+        className={`relative ${aspect} w-full rounded-2xl border-2 border-dashed border-white/10 overflow-hidden bg-white/5 flex flex-col items-center justify-center hover:border-emerald-500/40 transition-all cursor-pointer group`}
+      >
+        {preview ? (
+          <img src={preview} className="w-full h-full object-cover" alt="Preview" />
+        ) : (
+          <div className="flex flex-col items-center gap-1 opacity-20 group-hover:opacity-50 transition-opacity p-4 text-center">
+            <span className="text-xl">+</span>
+            <span className="text-[8px] font-bold uppercase tracking-tighter">Upload {label}</span>
+          </div>
+        )}
+        <input
+          id={id}
+          type="file"
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => onChange(e.target.files[0])}
+        />
+      </div>
+    </div>
+  );
+};
+
 const RegistrationBox = ({ onSwitchToLogin, role = "trekker" }) => {
   const [step, setStep] = useState(1); // 1: Form, 2: Guide Docs, 3: OTP
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(null);
 
-  // Additional state for Guide specifics
+  // Additional state for Guide specifics - Updated with dpImage
   const [guideData, setGuideData] = useState({
     licenseNo: "",
     licenseImage: null,
     citizenshipImage: null,
+    dpImage: null,
   });
 
   const {
@@ -65,14 +110,15 @@ const RegistrationBox = ({ onSwitchToLogin, role = "trekker" }) => {
     }
   };
 
-  // Step 2 Submit (Guide Only)
+  // Step 2 Submit (Guide Only) - Validating 3 images now
   const handleGuideSubmit = () => {
     if (
       !guideData.licenseNo ||
       !guideData.licenseImage ||
-      !guideData.citizenshipImage
+      !guideData.citizenshipImage ||
+      !guideData.dpImage
     ) {
-      return toast.error("Please fill all details and upload images");
+      return toast.error("Please fill all details and upload all 3 images");
     }
     handleRequestOtp(formData.email);
   };
@@ -105,6 +151,7 @@ const RegistrationBox = ({ onSwitchToLogin, role = "trekker" }) => {
         gData.append("licenseNo", guideData.licenseNo);
         gData.append("licenseImage", guideData.licenseImage);
         gData.append("citizenshipImage", guideData.citizenshipImage);
+        gData.append("dpImage", guideData.dpImage); // Send DP to Guide registration endpoint
 
         await api.post("/auth/register-guide", gData, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -279,42 +326,45 @@ const RegistrationBox = ({ onSwitchToLogin, role = "trekker" }) => {
             className="flex flex-col gap-4"
           >
             <input
+            label="License Number"
               placeholder="License Number"
               className={inputStyle()}
               onChange={(e) =>
                 setGuideData({ ...guideData, licenseNo: e.target.value })
               }
             />
-            <div className="flex flex-col gap-1">
-              <label className="text-white/40 text-xs ml-1">
-                License Image
-              </label>
-              <input
-                type="file"
-                className="text-white text-xs"
-                onChange={(e) =>
-                  setGuideData({
-                    ...guideData,
-                    licenseImage: e.target.files[0],
-                  })
-                }
-              />
+
+            {/* Rectangle Previews Section */}
+            <div className="flex flex-col gap-4">
+              {/* Added aspect="aspect-square" here for DP */}
+              <div className="flex justify-center w-full">
+                <div className="w-40 sm:w-48"> 
+                    <ImagePreview
+                        id="dp-upload"
+                        label="Profile Picture (DP)"
+                        file={guideData.dpImage}
+                        aspect="aspect-square"
+                        onChange={(file) => setGuideData({ ...guideData, dpImage: file })}
+                    />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <ImagePreview
+                  id="lic-upload"
+                  label="License Image"
+                  file={guideData.licenseImage}
+                  onChange={(file) => setGuideData({ ...guideData, licenseImage: file })}
+                />
+                <ImagePreview
+                  id="cit-upload"
+                  label="Citizenship"
+                  file={guideData.citizenshipImage}
+                  onChange={(file) => setGuideData({ ...guideData, citizenshipImage: file })}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-white/40 text-xs ml-1">
-                Citizenship Image
-              </label>
-              <input
-                type="file"
-                className="text-white text-xs"
-                onChange={(e) =>
-                  setGuideData({
-                    ...guideData,
-                    citizenshipImage: e.target.files[0],
-                  })
-                }
-              />
-            </div>
+
             <motion.button
               onClick={handleGuideSubmit}
               whileHover={{ scale: 1.01 }}

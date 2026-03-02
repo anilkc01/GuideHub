@@ -10,11 +10,15 @@ import MyPlanDetails from "./Protected/Trekker/Pages/PlanPage";
 import ExplorePlanDetails from "./Protected/Guides/Pages/PlanDetail";
 import MyTreksPage from "./Protected/Guides/Pages/myTreks";
 import ExploreSection from "./Protected/Guides/Pages/Explore";
-
-// Blog Components
 import BlogsPage from "./Protected/Common/Blogs";
-import BlogDetail from "./Protected/Common/BlogDetail"; // You'll create this
-import WriteBlog from "./Protected/Common/WriteBlog";   // You'll create this
+import BlogDetail from "./Protected/Common/BlogDetail";
+import WriteBlog from "./Protected/Common/WriteBlog";
+import UsersList from "./Protected/Admin/UserList";
+import AdminBlogPage from "./Protected/Admin/AdminBlogsPage";
+import AdminBlogDetail from "./Protected/Admin/AdminBlogDetails";
+import GuideVerification from "./Protected/Admin/Verification";
+import Profile from "./Protected/Common/myProfile";
+
 
 const App = () => {
   const [authChecked, setAuthChecked] = useState(false);
@@ -23,16 +27,17 @@ const App = () => {
 
   const checkAuth = async () => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
     if (!token) {
       setAuthorized(false);
       setRole(null);
       setAuthChecked(true);
       return;
     }
-
     try {
       const res = await api.get("/auth/verify-token");
+      const {  valid, user } = res.data;
+      console.log("Token verification response:", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
       setAuthorized(true);
       setRole(res.data.user.role);
     } catch (err) {
@@ -46,52 +51,48 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  useEffect(() => { checkAuth(); }, []);
 
   if (!authChecked) return null;
 
   return (
     <Routes>
-      {/* GUEST */}
-      {!authorized && (
-        <Route path="*" element={<GuestLayout onLoginSuccess={checkAuth} />} />
-      )}
+      {!authorized && <Route path="*" element={<GuestLayout onLoginSuccess={checkAuth} />} />}
 
-      {/* ADMIN */}
       {authorized && role === "admin" && (
-        <Route path="/" element={<AdminDashboard onLogout={checkAuth} />} />
+        <Route path="/" element={<AdminDashboard onLogout={checkAuth} />}>
+          <Route index element={<Navigate to="/guides" replace />} />
+          <Route path="/blogs" element={<AdminBlogPage userRole="admin" onLogout={checkAuth} />} />
+          <Route path="/blogs/:id" element={<AdminBlogDetail userRole="admin" onLogout={checkAuth} />} />
+          <Route path="verifications" element={<GuideVerification />} />
+          <Route path="guides" element={<UsersList type="guide" />} />
+          <Route path="trekkers" element={<UsersList type="trekker" />} />
+         
+        </Route>
       )}
 
-      {/* TREKKER */}
       {authorized && role === "trekker" && (
         <>
           <Route path="/" element={<TrekkerDashboard onLogout={checkAuth} />} />
-          
-          {/* Blog Routes for Trekker */}
           <Route path="/blogs" element={<BlogsPage userRole="trekker" onLogout={checkAuth} />} />
           <Route path="/blogs/:id" element={<BlogDetail userRole="trekker" onLogout={checkAuth} />} />
           <Route path="/blogs/write" element={<WriteBlog userRole="trekker" onLogout={checkAuth} />} />
-
           <Route path="/myPlan/:id" element={<MyPlanDetails onLogout={checkAuth} />} />
+          <Route path="/profile" element={<Profile onLogout={checkAuth} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </>
       )}
 
-      {/* GUIDE */}
       {authorized && role === "guide" && (
         <>
           <Route path="/" element={<GuideDashboard onLogout={checkAuth} />}>
             <Route index element={<ExploreSection />} />
             <Route path="myTrips" element={<MyTreksPage />} />
+            <Route path="profile" element={<Profile onLogout={checkAuth} />} />
           </Route>
-
-          {/* Blog Routes for Guide (Full Screen) */}
           <Route path="/blogs" element={<BlogsPage userRole="guide" onLogout={checkAuth} />} />
           <Route path="/blogs/:id" element={<BlogDetail userRole="guide" onLogout={checkAuth} />} />
           <Route path="/blogs/write" element={<WriteBlog userRole="guide" onLogout={checkAuth} />} />
-
           <Route path="/explore/:id" element={<ExplorePlanDetails onLogout={checkAuth} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </>

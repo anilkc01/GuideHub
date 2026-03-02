@@ -5,6 +5,8 @@ import TrekPlan from "../Models/TrekPlan.js";
 import Trip from "../Models/Trips.js";
 import User from "../Models/User.js";
 import UserReport from "../Models/UserReports.js";
+import fs from "fs";
+
 
 export const getUserProfile = async (req, res) => {
   try {
@@ -45,6 +47,61 @@ export const getUserProfile = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error", error: error.message });
+  }
+};
+
+export const updateUserDetails = async (req, res) => {
+  try {
+    const { fullName, phone, address, dob } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update fields
+    user.fullName = fullName || user.fullName;
+    user.phone = phone || user.phone;
+    user.address = address || user.address;
+    user.dob = dob || user.dob;
+
+    await user.save();
+
+    res.status(200).json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateDp = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded" });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // OPTIONAL: Delete old DP file from server to save space
+    if (user.dp && fs.existsSync(user.dp)) {
+      try {
+        fs.unlinkSync(user.dp); 
+      } catch (err) {
+        console.log("Old DP delete failed, moving on...");
+      }
+    }
+
+    // Save new path (e.g., uploads/users/1/dpImage-123.jpg)
+    user.dp = req.file.path;
+    await user.save();
+
+    res.status(200).json({ 
+      message: "Profile picture updated", 
+      dp: user.dp 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -197,3 +254,4 @@ export const reportUser = async (req, res) => {
     res.status(500).json({ message: "Report failed", error: error.message });
   }
 };
+

@@ -22,7 +22,7 @@ export const protect = async (req, res, next) => {
 
  
     const user = await User.findByPk(decoded.id, {
-      attributes: ["id", "email", "role", "status"],
+      attributes: ["id", "fullName","email", "role", "status", "dp"],
     });
 
     if (!user) {
