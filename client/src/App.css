@@ -33,3 +33,9 @@ body {
   border-radius: 10px;
 }
 
+.prose p {
+  text-align: left !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+}

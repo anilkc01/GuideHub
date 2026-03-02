@@ -7,26 +7,34 @@ const OfferCard = ({ bid, onAccept, planStatus }) => {
 
   return (
     <>
-      <div className={`bg-zinc-900/60 border rounded-2xl p-4 transition-all group mb-3 ${
-        bid.status === 'accepted' ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/5'
-      }`}>
+      <div
+        className={`bg-zinc-900/60 border rounded-2xl p-4 transition-all group mb-3 ${
+          bid.status === "accepted"
+            ? "border-emerald-500/50 bg-emerald-500/5"
+            : "border-white/5"
+        }`}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div 
+            <div
               onClick={() => setShowProfile(true)}
               className="cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
             >
               {bid.bidder?.dp ? (
-                <img src={bid.bidder.dp} className="w-8 h-8 rounded-full border border-white/10 object-cover" alt="Guide" />
+                <img
+                  src={`http://localhost:5002/${bid.bidder.dp}`}
+                  className="w-8 h-8 shrink-0 rounded-full border border-white/10 object-cover"
+                  alt="Bidder"
+                />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                  <User size={14} className="text-zinc-500" />
+                <div className="w-8 h-8 shrink-0 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                  <User size={16} className="text-zinc-500" strokeWidth={2.5} />
                 </div>
               )}
             </div>
-            
+
             <div className="flex flex-col min-w-0">
-              <h4 
+              <h4
                 onClick={() => setShowProfile(true)}
                 className="text-[10px] font-black uppercase tracking-tight truncate cursor-pointer hover:text-emerald-400 transition-colors"
               >
@@ -34,13 +42,17 @@ const OfferCard = ({ bid, onAccept, planStatus }) => {
               </h4>
               <div className="flex items-center gap-1 text-yellow-500">
                 <Star size={8} fill="currentColor" />
-                <span className="text-[9px] font-bold text-zinc-500">{bid.bidder?.rating || "New"}</span>
+                <span className="text-[9px] font-bold text-zinc-500">
+                  {bid.bidder?.rating || "New"}
+                </span>
               </div>
             </div>
           </div>
-          
+
           <div className="text-right flex-shrink-0">
-            <p className="text-[11px] font-black text-emerald-400">${bid.amount}</p>
+            <p className="text-[11px] font-black text-emerald-400">
+              ${bid.amount}
+            </p>
           </div>
         </div>
 
@@ -59,21 +71,23 @@ const OfferCard = ({ bid, onAccept, planStatus }) => {
           </div>
         ) : (
           planStatus === "open" && (
-            <button 
+            <button
               onClick={() => onAccept(bid.id)}
               className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-emerald-500 hover:text-black py-2 rounded-xl transition-all border border-white/5 hover:border-emerald-500"
             >
               <Check size={12} strokeWidth={3} />
-              <span className="text-[9px] font-black uppercase tracking-widest">Accept Offer</span>
+              <span className="text-[9px] font-black uppercase tracking-widest">
+                Accept Offer
+              </span>
             </button>
           )
         )}
       </div>
 
       {showProfile && (
-        <UserDetailCard 
-          userId={bid.bidderId} 
-          onClose={() => setShowProfile(false)} 
+        <UserDetailCard
+          userId={bid.bidderId}
+          onClose={() => setShowProfile(false)}
         />
       )}
     </>

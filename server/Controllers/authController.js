@@ -46,11 +46,15 @@ export const registerGuide = async (req, res) => {
     const { userId, licenseNo } = req.body;
     const files = req.files;
 
-    if (!files.licenseImage || !files.citizenshipImage) {
-      return res.status(400).json({ message: "Both images are required." });
+    if (!files.licenseImage || !files.citizenshipImage || !files.dpImage) {
+      return res.status(400).json({ message: "All three images (License, Citizenship, and DP) are required." });
     }
 
-    console.log("Received files:", files.licenseImage.path, files.citizenshipImage[0].path);
+    await User.update(
+      { dp: files.dpImage[0].path },
+      { where: { id: userId } }
+    );
+
     await Guide.create({
       userId,
       licenseNo,
@@ -84,6 +88,10 @@ export const verifyEmail = async (req, res) => {
 
     if (user.status === "suspended") {
       return res.status(403).json({ message: "This account has been suspended." });
+    }
+
+    if (user.status === "deactivated") {
+      return res.status(404).json({ message: "No account found with this email." });
     }
 
     
@@ -124,7 +132,9 @@ export const verifyPassword = async (req, res) => {
       user: {
         id: user.id,
         fullName: user.fullName,
-        role: user.role
+        role: user.role,
+        dp: user.dp,
+        status: user.status,
       }
     });
   } catch (error) {
@@ -134,14 +144,32 @@ export const verifyPassword = async (req, res) => {
 
 export const verifyToken = (req, res) => {
   res.status(200).json({
-    valid: true,
+    
     user: {
       id: req.user.id,
-      email: req.user.email,
-      role: req.user.role,      
-      status: req.user.status, 
+      fullName: req.user.fullName,
+      role: req.user.role,
+      dp: req.user.dp,
+      status: req.user.status
     },
   });
+};
+
+export const getMe = async (req, res) => {
+  try {
+    // req.user.id comes from your 'protect' middleware
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['password'] } // Security: never send password back
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const deleteAccount = async (req, res) => {
@@ -225,5 +253,34 @@ export const verifyOtp = async (req, res) => {
     return res.status(200).json({ message: "OTP verified" });
   } catch (error) {
     return res.status(500).json({ message: "Verification failed" });
+  }
+};
+
+export const deactiveAccount = async (req, res) => {
+  const { password } = req.body;
+  const user = await User.findByPk(req.user.id);
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(401).json({ message: "Incorrect password" });
+
+  user.status = "deactivated";
+  await user.save();
+  res.json({ message: "Account deactivated" });
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findByPk(req.user.id);
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Current password incorrect" });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };

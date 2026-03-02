@@ -28,18 +28,13 @@ const BlogReport = sequelize.define(
       },
     },
 
-    category: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-
     description: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
 
     status: {
-      type: DataTypes.ENUM("pending", "reviewed"),
+      type: DataTypes.ENUM("pending", "resolved"),
       defaultValue: "pending",
     },
   },
@@ -48,5 +43,9 @@ const BlogReport = sequelize.define(
     timestamps: true,
   }
 );
+
+BlogReport.belongsTo(User, { foreignKey: "reporterId", as: "reporter" });
+BlogReport.belongsTo(Blog, { foreignKey: "blogId", as: "reportedBlog" });
+
 
 export default BlogReport;

@@ -58,7 +58,7 @@ const User = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("active", "suspended"),
+      type: DataTypes.ENUM("active", "suspended", "deactivated"),
       allowNull: false,
       defaultValue: "active",
     },

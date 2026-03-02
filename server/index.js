@@ -6,6 +6,7 @@ import offerRoutes from "./Routes/offerRoutes.js";
 import userRoutes from "./Routes/userRoutes.js";
 import tripRoutes from "./Routes/tripRoutes.js";
 import blogRoutes from "./Routes/blogRoutes.js";
+import adminRoutes from "./Routes/adminRoutes.js";
 import path from "path";
 import cors from "cors";
 
@@ -30,6 +31,7 @@ app.use("/api/offers", offerRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(5002, () => {
   console.log("Server running on port 5002");
