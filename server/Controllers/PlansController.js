@@ -1,3 +1,5 @@
+import { sequelize } from "../Database/database.js";
+import Offer from "../Models/Offer.js";
 import TrekPlan from "../Models/TrekPlan.js";
 import User from "../Models/User.js";
 
@@ -80,12 +82,44 @@ export const updateTrekPlan = async (req, res) => {
   }
 };
 
-export const deleteTrekPlan = async (req, res) => {
+export const deletePlan = async (req, res) => {
+
+  const t = await sequelize.transaction();
+  
   try {
-    await req.plan.destroy();
-    res.status(200).json({ success: true, message: "Plan deleted" });
+    const { id } = req.params;
+    const trekkerId = req.user.id;
+
+    const plan = await TrekPlan.findOne({ 
+      where: { id, trekkerId },
+      transaction: t 
+    });
+
+    if (!plan) {
+      await t.rollback();
+      return res.status(404).json({ message: "Plan not found" });
+    }
+
+    if (plan.status !== 'open') {
+      await t.rollback();
+      return res.status(400).json({ message: "Only 'open' plans can be cancelled" });
+    }
+
+    await plan.update({ status: 'cancelled' }, { transaction: t });
+    await Offer.update(
+      { status: 'cancelled' }, 
+      { 
+        where: { trekPlanId: id }, 
+        transaction: t 
+      }
+    );
+
+    await t.commit();
+    
+    res.status(200).json({ message: "Plan and all associated offers cancelled" });
   } catch (error) {
-    res.status(500).json({ message: "Delete failed", error: error.message });
+    await t.rollback();
+    res.status(500).json({ message: "Failed to cancel plan", error: error.message });
   }
 };
 
@@ -98,7 +132,7 @@ export const getPlanById = async (req, res) => {
         {
           model: User,
           as: "trekker",
-          attributes: ["id", "fullName", "email"],
+          attributes: ["id", "fullName","dp", "email"],
         },
       ],
     });

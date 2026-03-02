@@ -1,71 +1,85 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { User, LogOut, ChevronDown } from 'lucide-react';
 
 const GuideNavBar = ({ user, onLogout }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const isOnTripsPage = location.pathname === "/myTrips";
+  const isOnBlogPage = location.pathname.startsWith("/blogs");
+
+  const handleLogoutAction = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    onLogout();
+    navigate("/");
+  };
+
   return (
-    <nav 
-      className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-2 lg:px-10 lg:py-3 
-      bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-2xl 
-      transition-all duration-300 ease-in-out"
-    >
-      {/* Left Section: Just the Logo */}
+    <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-2 lg:px-10 lg:py-3 bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-2xl transition-all">
       <div className="flex items-center">
-        <Link to="/dashboard">
-          <img 
-            src="/src/assets/logoHW.png" 
-            alt="GuideHub Logo" 
-            className="h-12 w-auto lg:h-14"
-          />
-        </Link>
+        <Link to="/"><img src="/src/assets/logoHW.png" alt="Logo" className="h-12 lg:h-14" /></Link>
       </div>
 
-      {/* Right Section: Links + User Profile */}
       <div className="flex items-center gap-6 lg:gap-10">
-        
-        {/* Navigation Links moved to the Right */}
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/about" className="text-white/70 hover:text-white transition-colors text-xl font-bold">
-            About Us
-          </Link>
-          <Link 
-            to="/community" 
-            className="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-full text-xl font-bold transition-all"
-          >
-            Community
-          </Link>
+          {!isOnBlogPage && (
+            isOnTripsPage ? (
+              <Link to="/" className="text-emerald-400 hover:text-white transition-colors text-xl font-bold flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Explore Plans
+              </Link>
+            ) : (
+              <Link to="/myTrips" className="text-white/70 hover:text-white transition-colors text-xl font-bold">My Trips</Link>
+            )
+          )}
+          <Link to="/about" className="text-white/70 hover:text-white transition-colors text-xl font-bold">About Us</Link>
+          {isOnBlogPage ? (
+            <Link to="/" className="text-emerald-400 hover:text-white transition-colors text-xl font-bold flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Dashboard
+            </Link>
+          ) : (
+            <Link to="/blogs" className="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-full text-xl font-bold transition-all">Blogs</Link>
+          )}
         </div>
 
-        {/* Vertical Divider (Optional, for visual clarity) */}
         <div className="hidden md:block h-6 w-px bg-white/10"></div>
 
-        {/* User Profile Area */}
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-white leading-none">
-              {user?.fullName || "Tek Bahadur KC"}
-            </p>
-            <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1 tracking-wider">
-              Trekker
-            </p>
-          </div>
-          
-          <div className="group relative">
-            <img 
-              src={user?.avatar || "https://via.placeholder.com/40"} 
-              alt="User Avatar" 
-              className="w-10 h-10 lg:w-11 lg:h-11 rounded-full object-cover border border-white/20 cursor-pointer hover:border-white/50 transition-all"
-            />
-            
-            {/* Logout Dropdown */}
-            <div className="absolute right-0 top-14 hidden group-hover:block bg-zinc-900 border border-white/10 p-2 rounded-xl shadow-2xl min-w-30">
-               <button 
-                 onClick={onLogout}
-                 className="w-full text-left text-xs text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
-               >
-                 Sign Out
-               </button>
+        {/* GUIDE DROPDOWN */}
+        <div className="relative" ref={dropdownRef}>
+          <div onClick={() => setShowDropdown(!showDropdown)} className="flex items-center gap-3 cursor-pointer group">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-white leading-none group-hover:text-emerald-400 transition-colors">{user?.fullName}</p>
+              <p className="text-[9px] text-zinc-500 font-black uppercase mt-1 tracking-widest">Guide</p>
+            </div>
+            <div className="relative">
+              <img src={user?.avatar || "https://via.placeholder.com/40"} className={`w-10 h-10 lg:w-11 lg:h-11 rounded-full object-cover border-2 transition-all ${showDropdown ? 'border-emerald-500' : 'border-white/10 group-hover:border-white/30'}`} />
+              <div className="absolute -bottom-1 -right-1 bg-zinc-900 border border-white/10 rounded-full p-0.5"><ChevronDown size={10} className={showDropdown ? 'rotate-180' : ''} /></div>
             </div>
           </div>
+
+          {showDropdown && (
+            <div className="absolute right-0 mt-4 w-48 bg-zinc-950 border border-white/10 p-2 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <Link to="/profile" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 w-full text-left text-[11px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 p-3 rounded-xl transition-all">
+                <User size={14} /> Profile
+              </Link>
+              <button onClick={handleLogoutAction} className="flex items-center gap-3 w-full text-left text-[11px] font-bold text-red-400 hover:bg-red-500/10 p-3 rounded-xl transition-all">
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

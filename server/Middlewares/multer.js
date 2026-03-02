@@ -2,40 +2,62 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const storage = multer.diskStorage({
+// 1. Storage for Guide Documents (Nested by User ID)
+const storageGuide = multer.diskStorage({
   destination: (req, file, cb) => {
-    // We expect userId to be passed in the URL or Body for the guide registration step
     const userId = req.body.userId || req.params.userId;
     const uploadPath = `uploads/users/${userId}/`;
 
-    // Create folder if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    // Save as: license-1738291.jpg or citizenship-1738291.png
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
-// File filter to ensure only images are uploaded
+// 2. Storage for Blogs (Flat Folder)
+const storageBlogs = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = "uploads/blogs/";
+
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `blog-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+// Shared File Filter
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only .png, .jpg and .jpeg format allowed!"), false);
+    cb(new Error("Only .png, .jpg, .webp and .jpeg format allowed!"), false);
   }
 };
 
+// EXPORT 1: Guide Documents (Multiple Fields)
 export const uploadGuideDocs = multer({ 
-  storage, 
+  storage: storageGuide, 
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 } 
 }).fields([
   { name: "licenseImage", maxCount: 1 },
   { name: "citizenshipImage", maxCount: 1 }
 ]);
+
+// EXPORT 2: Blog Images (Single Field)
+export const uploadBlogImage = multer({
+  storage: storageBlogs,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }
+}).single("image");

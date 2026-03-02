@@ -18,11 +18,7 @@ const PlanListCard = ({ plan }) => {
 
   return (
     <div className="group relative flex flex-col md:flex-row gap-6 p-6 bg-white/3 hover:bg-white/6 border border-white/5 hover:border-white/10 rounded-[2.5rem] transition-all duration-500 cursor-pointer overflow-hidden">
-      {/* Subtle Background Icon for flair */}
-      <Quote
-        className="absolute -top-2 -right-2 text-white/2 rotate-12 group-hover:text-emerald-500/5 transition-colors"
-        size={120}
-      />
+      
 
       <div className="flex-1 space-y-4 relative z-10">
         <div className="flex items-center gap-3">
