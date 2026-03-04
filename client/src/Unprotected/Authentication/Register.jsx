@@ -225,8 +225,8 @@ const RegistrationBox = ({ onSwitchToLogin, role = "trekker" }) => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="relative">
+            <div className="grid grid-cols-2 gap-3 mb-2 sm:gap-4">
+              <div className="relative pb-2">
                 <input
                   {...register("phone")}
                   onChange={handlePhoneChange}
