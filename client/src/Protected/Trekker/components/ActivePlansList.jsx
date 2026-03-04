@@ -3,7 +3,7 @@ import api from "../../../api/axios";
 import ActivePlanCard from "./ActivePlanCard";
 import { Loader2, Inbox } from "lucide-react";
 
-const MyActivePlans = () => {
+const MyActivePlans = ({ refreshTrigger }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +20,7 @@ const MyActivePlans = () => {
 
   useEffect(() => {
     fetchPlans();
-  }, []);
+  }, [refreshTrigger]);
 
   if (loading) {
     return (

@@ -121,7 +121,7 @@ const BlogDetail = ({ userRole, onLogout }) => {
 
         {/* Inline Report Form UI... */}
         {showReportForm && (
-          <div className="mb-10 p-6 bg-red-500/5 border border-red-500/20 rounded-[2rem] animate-in slide-in-from-top-4 duration-500">
+          <div className="mb-10 p-6 bg-red-500/5 border border-red-500/20 rounded-4xlimate-in slide-in-from-top-4 duration-500">
             {/* ... same as your previous code ... */}
             <div className="flex items-center gap-2 text-red-500 mb-4">
               <AlertTriangle size={16} />
@@ -133,7 +133,7 @@ const BlogDetail = ({ userRole, onLogout }) => {
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               placeholder="Why are you reporting this story?"
-              className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm text-zinc-300 outline-none focus:border-red-500/50 min-h-[100px] mb-4"
+              className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm text-zinc-300 outline-none focus:border-red-500/50 min-h-25 mb-4"
             />
             <button
               onClick={handleReportSubmit}
@@ -146,7 +146,7 @@ const BlogDetail = ({ userRole, onLogout }) => {
         )}
 
         {/* Blog Content UI (Feature Image, Intro, Content) ... same as your previous code ... */}
-        <div className="w-full h-[500px] rounded-[2rem] overflow-hidden mb-5 border border-white/5">
+        <div className="w-full h-125 rounded-4xl overflow-hidden mb-5 border border-white/5">
           <img
             src={`http://localhost:5002/${blog.cover}`}
             className="w-full h-full object-cover"
@@ -182,11 +182,11 @@ const BlogDetail = ({ userRole, onLogout }) => {
         <div
           className="prose prose-invert prose-emerald max-w-none text-zinc-300 text-lg leading-relaxed selection:bg-emerald-500/30"
           style={{
-            textAlign: "left", // Avoids the huge gaps between words
-            wordBreak: "break-word", // Only breaks at spaces or hyphens
-            overflowWrap: "break-word", // Extra safety for long URLs
-            hyphens: "none", // Prevents the browser from adding its own dashes
-          }}
+            textAlign: "left", 
+            wordBreak: "break-word", 
+            overflowWrap: "break-word", 
+            hyphens: "none", 
+                   }}
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
       </main>

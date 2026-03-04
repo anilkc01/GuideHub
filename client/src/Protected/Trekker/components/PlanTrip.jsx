@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { trekPlanSchema } from "./schema.PlanTrip"; 
 import { X, Plus, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "../../../api/axios"; // Assuming you have an API utility for making requests
+import api from "../../../api/axios"; 
 
 const PlanTrekForm = ({ isOpen, onClose, onSubmitSuccess, initialData = null }) => {
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ const PlanTrekForm = ({ isOpen, onClose, onSubmitSuccess, initialData = null }) 
         onClose();
       }
 
-      onSubmitSuccess(response.data.plan);
+      onSubmitSuccess?.();
       onClose();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to save trek plan");

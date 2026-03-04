@@ -14,14 +14,20 @@ const BlogsPage = ({ userRole, onLogout }) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   const fetchBlogs = async () => {
-    setLoading(true);
-    try {
-      const endpoint = activeTab === "explore" ? "/blogs" : "/blogs/my";
-      const res = await api.get(endpoint);
-      setBlogs(res.data);
-    } catch (err) { console.error(err); }
+  setLoading(true);
+  setBlogs([]); 
+  try {
+    const endpoint = activeTab === "explore" ? "/blogs" : "/blogs/my";
+    const res = await api.get(endpoint);
+    
+    setBlogs(Array.isArray(res.data) ? res.data : []);
+  } catch (err) { 
+    console.error("Fetch Error:", err);
+    toast.error("Failed to load stories");
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   useEffect(() => { fetchBlogs(); }, [activeTab]);
 

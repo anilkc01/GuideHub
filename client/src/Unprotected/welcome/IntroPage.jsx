@@ -1,8 +1,10 @@
-import { useRef } from "react";
+import { use, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const LandingPage = ({ scrollContainerRef }) => {
   const ref = useRef(null);
+  const navigate = useNavigate();
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -38,7 +40,7 @@ const LandingPage = ({ scrollContainerRef }) => {
                    sm:-translate-x-3 sm:-translate-y-12
                    md:-translate-x-4 md:-translate-y-10
                    lg:-translate-x-8 lg:-translate-y-15
-                   xl:-translate-x-12 xl:-translate-y-25"
+                   xl:-translate-x-12 xl:-translate-y-32"
       >
         GuideHub
       </motion.h1>
@@ -93,6 +95,7 @@ const LandingPage = ({ scrollContainerRef }) => {
           whileTap={{ scale: 0.95 }}
           className="px-5 py-3 bg-white/10 text-white font-bold rounded-full 
                transition-colors shadow-[0_10px_20px_rgba(0,0,0,0.3)] text-lg uppercase tracking-wider"
+          onClick={() => navigate("/learn-more")}
         >
           Learn More
         </motion.button>

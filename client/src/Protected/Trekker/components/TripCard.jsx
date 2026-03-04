@@ -23,7 +23,7 @@ const TripCard = ({ trip }) => {
       className="group relative bg-zinc-900/40 border border-white/5 hover:border-emerald-500/30 p-3 rounded-xl transition-all duration-300 cursor-pointer mb-2"
     >
       <div className="flex justify-between items-center mb-2">
-        <h4 className="text-[13px] font-bold text-white truncate max-w-[150px] tracking-tight">
+        <h4 className="text-[13px] font-bold text-white truncate max-w-37.5 tracking-tight">
           {trip.TrekPlan?.title}
         </h4>
         <span className={`text-[8px] font-black px-2 py-0.5 rounded-md uppercase border ${statusStyles[trip.status] || statusStyles.upcoming}`}>
@@ -45,7 +45,7 @@ const TripCard = ({ trip }) => {
         <div className="flex items-center gap-2 border-l border-white/10 pl-3">
           <User size={12} className="text-zinc-500" />
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-zinc-200 truncate max-w-[80px]">
+            <span className="text-[10px] font-bold text-zinc-200 truncate max-w-20">
               {trip.guide?.fullName.split(' ')[0]}
             </span>
             <span className="text-[8px] text-zinc-500 uppercase font-black">Guide</span>

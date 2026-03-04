@@ -16,23 +16,6 @@ const GuestLayout = ({ onLoginSuccess }) => {
     const handleScroll = () => {
       const { scrollTop, clientHeight } = container;
 
-      // 1. Check if we are perfectly snapped to any page
-      const isSnapped = Math.abs(scrollTop % clientHeight) < 10;
-
-      // 2. Determine scroll direction
-      const isScrollingDown = scrollTop > lastScrollTop.current;
-
-      if (isSnapped) {
-        // Always show when a page is fully in view
-        setShowNavbar(true);
-      } else if (isScrollingDown) {
-        // Hide only when moving downwards between pages
-        setShowNavbar(false);
-      } else {
-        // Show when moving upwards between pages
-        setShowNavbar(true);
-      }
-
       lastScrollTop.current = scrollTop;
     };
 

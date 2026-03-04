@@ -19,7 +19,7 @@ const OfferCard = ({ bid, onAccept, planStatus, onMessage }) => {
             {/* Profile Picture Trigger */}
             <div
               onClick={() => setShowProfile(true)}
-              className="cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
+              className="cursor-pointer hover:opacity-80 transition-opacity shrink-0"
             >
               {bid.bidder?.dp ? (
                 <img
@@ -52,7 +52,7 @@ const OfferCard = ({ bid, onAccept, planStatus, onMessage }) => {
           </div>
 
           {/* Action Buttons & Price */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             {/* START CHAT BUTTON */}
             <button
               onClick={onMessage}
@@ -71,7 +71,7 @@ const OfferCard = ({ bid, onAccept, planStatus, onMessage }) => {
         </div>
 
         {/* Bid Message */}
-        <p className="text-[10px] text-zinc-500 italic leading-relaxed mb-4 line-clamp-2 px-3 py-1 border-l-2 border-white/10 bg-white/[0.01] rounded-r-lg">
+        <p className="text-[10px] text-zinc-500 italic leading-relaxed mb-4 line-clamp-2 px-3 py-1 border-l-2 border-white/10 bg-white/1 rounded-r-lg">
           "{bid.message}"
         </p>
 
