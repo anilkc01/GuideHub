@@ -64,6 +64,7 @@ const Trip = sequelize.define(
   }
 );
 
+TrekPlan.hasOne(Trip, { foreignKey: "trekPlanId" }); 
 Trip.belongsTo(TrekPlan, { foreignKey: "trekPlanId" });
 Trip.belongsTo(User, { foreignKey: "trekkerId", as: "trekker" });
 Trip.belongsTo(User, { foreignKey: "guideId", as: "guide" });

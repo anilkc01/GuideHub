@@ -236,7 +236,6 @@ export const rateUser = async (req, res) => {
   }
 };
 
-// Handle Reporting
 export const reportUser = async (req, res) => {
   try {
     const { reportedUserId, reason, description } = req.body;

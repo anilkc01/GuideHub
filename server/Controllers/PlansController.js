@@ -1,6 +1,7 @@
 import { sequelize } from "../Database/database.js";
 import Offer from "../Models/Offer.js";
 import TrekPlan from "../Models/TrekPlan.js";
+import Trip from "../Models/Trips.js";
 import User from "../Models/User.js";
 
 export const createTrekPlan = async (req, res) => {
@@ -134,6 +135,10 @@ export const getPlanById = async (req, res) => {
           as: "trekker",
           attributes: ["id", "fullName","dp", "email"],
         },
+        {
+          model: Trip,
+          attributes: ["id", "status"],
+        }
       ],
     });
 

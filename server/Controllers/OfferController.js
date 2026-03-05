@@ -1,18 +1,32 @@
 import Offer from "../Models/Offer.js";
 import User from "../Models/User.js";
+import Guide from "../Models/Guide.js";
 import TrekPlan from "../Models/TrekPlan.js";
 import { Op } from "sequelize";
 import Trip from "../Models/Trips.js";
 import { sequelize } from "../Database/database.js";
 import { sendEmail } from "../Services/Email.js";
 
-// 1. Create a new bid
+
 export const createOffer = async (req, res) => {
   try {
     const { trekPlanId, amount, message } = req.body;
-    const bidderId = req.user.id; // Assuming user id is in req.user from auth middleware
+    const bidderId = req.user.id; 
 
-    // Check if the plan exists and is still open
+    const user = await User.findByPk(bidderId);
+    
+    if (!user || user.role !== "guide") {
+      return res.status(403).json({ message: "Only guides can place bids." });
+    }
+
+    const guideProfile = await Guide.findOne({ where: { userId: bidderId } });
+
+    if (guideProfile.status !== "verified") {
+      return res.status(403).json({ 
+        message: "Your account is not verified. Please wait for admin approval before bidding." 
+      });
+    }
+
     const plan = await TrekPlan.findByPk(trekPlanId);
     if (!plan || plan.status !== "open") {
       return res
@@ -20,7 +34,6 @@ export const createOffer = async (req, res) => {
         .json({ message: "This trek plan is no longer accepting offers." });
     }
 
-    // Prevent duplicate bids from the same guide
     const existingOffer = await Offer.findOne({
       where: { trekPlanId, bidderId },
     });
@@ -61,11 +74,9 @@ export const updateOffer = async (req, res) => {
     }
 
     if (offer.status !== "pending") {
-      return res
-        .status(400)
-        .json({
-          message: "Cannot update an offer that has already been processed.",
-        });
+      return res.status(400).json({
+        message: "Cannot update an offer that has already been processed.",
+      });
     }
 
     await offer.update({ amount, message });
@@ -89,7 +100,7 @@ export const getOffersByPlan = async (req, res) => {
         {
           model: User,
           as: "bidder",
-          attributes: ["id","fullName", "dp", "rating"], // Specifically for your sidebar list
+          attributes: ["id", "fullName", "dp", "rating"], // Specifically for your sidebar list
         },
       ],
       order: [["createdAt", "DESC"]], // Newest offers first
@@ -104,32 +115,35 @@ export const getOffersByPlan = async (req, res) => {
 };
 
 export const acceptOffer = async (req, res) => {
-  const { id } = req.params; // Offer ID
+  const { id } = req.params;
   const t = await sequelize.transaction();
 
   try {
-    // 1. Fetch the offer with Plan details to get necessary trip data
-    const acceptedOffer = await Offer.findByPk(id, {
-      include: [{ model: TrekPlan, as: "plan" }],
+    // 1. Fetch offer ONLY 
+    const acceptedOffer = await Offer.findByPk(id, { transaction: t });
+
+    if (!acceptedOffer) {
+      await t.rollback();
+      return res.status(404).json({ message: "Offer not found" });
+    }
+
+    // 2. Fetch plan separately
+    const plan = await TrekPlan.findByPk(acceptedOffer.trekPlanId, {
       transaction: t,
     });
 
-    if (!acceptedOffer || !acceptedOffer.plan) {
+    if (!plan) {
       await t.rollback();
-      return res
-        .status(404)
-        .json({ message: "Offer or associated Plan not found" });
+      return res.status(404).json({ message: "Associated Plan not found" });
     }
 
-    const plan = acceptedOffer.plan;
-
-    // 2. Update the chosen offer to 'accepted'
+    // 3. Accept selected offer
     await Offer.update(
       { status: "accepted" },
       { where: { id }, transaction: t },
     );
 
-    // 3. Update all other offers for this plan to 'rejected'
+    // 4. Reject others
     await Offer.update(
       { status: "rejected" },
       {
@@ -141,17 +155,16 @@ export const acceptOffer = async (req, res) => {
       },
     );
 
-    // 4. Update the TrekPlan status
+    // 5. Update plan
     await TrekPlan.update(
       { status: "completed" },
       { where: { id: plan.id }, transaction: t },
     );
 
+    // 6. Create trip
     const startDate = new Date();
-
-    const durationDays = plan.itinerary ? plan.itinerary.length : 1;
-
-    const endDate = new Date();
+    const durationDays = plan.itinerary?.length || 1;
+    const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + durationDays);
 
     await Trip.create(
@@ -159,35 +172,47 @@ export const acceptOffer = async (req, res) => {
         trekPlanId: plan.id,
         trekkerId: plan.trekkerId,
         guideId: acceptedOffer.bidderId,
-        startDate: startDate,
-        endDate: endDate,
+        startDate,
+        endDate,
         status: "upcoming",
-        remarks: `Trip confirmed with guide at budget: $${acceptedOffer.amount}. Duration: ${durationDays} days.`,
+        remarks: `Trip confirmed at $${acceptedOffer.amount} for ${durationDays} days.`,
       },
       { transaction: t },
     );
 
     await t.commit();
-    await sendEmail(
-      acceptedOffer.bidder.email,
-      "Offer Accepted - New Trip Scheduled!",
-      `<p>Congratulations ${acceptedOffer.bidder.fullName},</p>
-       <p>Your offer for the trek <strong>${plan.title || "Trip"}</strong> has been accepted.</p>
-       <p>Please check your dashboard for trip details.</p>`
-    );
+
+    try {
+      const bidder = await User.findByPk(acceptedOffer.bidderId);
+
+      if (bidder?.email) {
+        await sendEmail(
+          bidder.email,
+          "Offer Accepted - New Trip Scheduled!",
+          `<p>Congratulations ${bidder.fullName},</p>
+         <p>Your offer for <strong>${plan.title || "Trip"}</strong> has been accepted.</p>
+         <p>Please check your dashboard for trip details.</p>`,
+        );
+      }
+    } catch (emailError) {
+      console.error("Email failed but trip was created:", emailError.message);
+    }
 
     res.status(200).json({
-      message: "Offer accepted! A new trip has been scheduled.",
+      message: "Offer accepted! Trip scheduled successfully.",
       guideId: acceptedOffer.bidderId,
     });
   } catch (error) {
-    await t.rollback();
-    res
-      .status(500)
-      .json({ message: "Failed to finalize trip", error: error.message });
+    if (!t.finished) {
+      await t.rollback();
+    }
+
+    res.status(500).json({
+      message: "Failed to finalize trip",
+      error: error.message,
+    });
   }
 };
-
 
 export const getMyOffers = async (req, res) => {
   try {
@@ -205,8 +230,8 @@ export const getMyOffers = async (req, res) => {
               model: User,
               as: "trekker",
               attributes: ["fullName", "dp"],
-            }
-          ]
+            },
+          ],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -214,6 +239,8 @@ export const getMyOffers = async (req, res) => {
 
     res.status(200).json(bids);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch your bids", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch your bids", error: error.message });
   }
 };

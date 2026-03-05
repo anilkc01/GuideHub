@@ -62,3 +62,19 @@ export const getGuideTrips = async (req, res) => {
     res.status(500).json({ message: "Error fetching assigned treks" });
   }
 };
+
+export const markTripCompleted = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const trip = await Trip.findByPk(id);
+
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    trip.status = "completed";
+    await trip.save();
+
+    res.status(200).json({ message: "Trip marked as completed", trip });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed", error: error.message });
+  }
+};

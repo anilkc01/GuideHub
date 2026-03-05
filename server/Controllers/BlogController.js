@@ -24,9 +24,16 @@ export const getMyBlogs = async (req, res) => {
     const blogs = await Blog.findAll({
       where: {
         authorId: req.user.id,
-        where: { status: "published" },
+        status: "published",
       },
-      include: [{ model: User, as: "author", attributes: ["fullName", "dp"] }],
+      include: [
+        { 
+          model: User, 
+          as: "author", 
+          attributes: ["fullName", "dp"] 
+        }
+      ],
+      order: [['createdAt', 'DESC']]
     });
     res.json(blogs);
   } catch (error) {
